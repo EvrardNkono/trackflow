@@ -24,7 +24,7 @@ const HeroSection = () => {
     { name: 'Mondial Relay', logo: '/images/mondialrelay.webp' },
   ]
 
-  // Double le tableau pour l'effet de défilement infini
+  // Doublé le tableau pour l'effet de défilement infini
   const doubledPartners = [...partners, ...partners]
 
   useEffect(() => {
@@ -65,20 +65,38 @@ const HeroSection = () => {
           experience and make shipping with us easier.
         </p>
         
-        {/* ✅ Badge d'accréditation ANSI */}
-        <div className="flex flex-col items-center gap-4 mb-6">
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
+        {/* ✅ Badges d'accréditation - ANSI + ISO 2008 */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+          {/* ANSI Badge */}
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
             <img 
               src="/images/acredited.webp" 
               alt="ANSI Accredited" 
-              className="h-12 md:h-16 w-auto object-contain"
+              className="h-10 md:h-12 w-auto object-contain"
             />
             <div className="text-left">
-              <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-white/80">
                 ANSI Accredited
               </p>
-              <p className="text-[10px] text-white/60">
+              <p className="text-[8px] text-white/60">
                 American National Standards Institute
+              </p>
+            </div>
+          </div>
+
+          {/* ✅ ISO 2008 Badge */}
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
+            <img 
+              src="/images/iso2000.png" 
+              alt="ISO 2008 Certified" 
+              className="h-10 md:h-12 w-auto object-contain"
+            />
+            <div className="text-left">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-white/80">
+                ISO 2008 Certified
+              </p>
+              <p className="text-[8px] text-white/60">
+                International Organization for Standardization
               </p>
             </div>
           </div>
