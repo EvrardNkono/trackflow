@@ -1,0 +1,801 @@
+// src/admin/CreateShipment.jsx
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { generateSecureTrackingCode } from '../utils/trackingCode'
+import useShipments from '../hooks/useShipments'
+
+const CreateShipment = () => {
+  const navigate = useNavigate()
+  const { createShipment } = useShipments()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    // Tracking code
+    trackingCode: generateSecureTrackingCode(),
+    
+    // 📍 Location & Delivery
+    currentLocation: '',
+    currentLatitude: '',
+    currentLongitude: '',
+    estimatedDelivery: '',
+    
+    // 📤 Sender (Liste d'entreprises premium)
+    senderCompany: 'DHL',
+    senderName: '',
+    senderEmail: '',
+    senderPhone: '',
+    senderAddress: '',
+    senderTaxId: '',
+    
+    // 📬 Recipient
+    recipientName: '',
+    recipientEmail: '',
+    recipientPhone: '',
+    recipientAddress: '',
+    recipientCity: '',
+    recipientPostalCode: '',
+    recipientCountry: 'United States',
+    
+    // 📦 Package Details
+    weight: '',
+    dimensions: '',
+    packageType: 'standard',
+    deliveryType: 'standard',
+    deliveryDate: '',
+    declaredValue: '',
+    insuranceType: 'none',
+    handlingInstructions: '',
+    specialInstructions: '',
+    temperature: '',
+    isHazardous: false,
+    isFragile: false,
+    isPerishable: false,
+    
+    // 🚚 Courier
+    courierName: '',
+    courierEmail: '',
+    vehicleType: '',
+    
+    // 📋 Additional Info
+    referenceNumber: '',
+    costCenter: '',
+    internalNotes: '',
+    priority: 'normal',
+  })
+
+  // 🏢 Liste des 15 entreprises expéditrices premium
+  const senderCompanies = [
+    // 🇺🇸 USA
+    { value: 'DHL', label: 'DHL Express' },
+    { value: 'FedEx', label: 'FedEx International' },
+    { value: 'UPS', label: 'UPS Worldwide' },
+    { value: 'USPS', label: 'USPS Priority' },
+    { value: 'Amazon Logistics', label: 'Amazon Logistics' },
+    
+    // 🇪🇺 Europe
+    { value: 'TNT', label: 'TNT Express' },
+    { value: 'DB Schenker', label: 'DB Schenker Logistics' },
+    { value: 'Kuehne + Nagel', label: 'Kuehne + Nagel' },
+    { value: 'DSV', label: 'DSV Global Transport' },
+    { value: 'XPO Logistics', label: 'XPO Logistics' },
+    
+    // 🌏 Asie & Océanie
+    { value: 'Yamato Transport', label: 'Yamato Transport' },
+    { value: 'Nippon Express', label: 'Nippon Express' },
+    { value: 'Toll Group', label: 'Toll Group' },
+    
+    // 🌎 Autres
+    { value: 'Maersk', label: 'Maersk Logistics' },
+    { value: 'Trans Dispatch', label: '⭐ Trans Dispatch Premium' },
+  ]
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }))
+  }
+
+  const handleRegenerateCode = () => {
+    setFormData(prev => ({
+      ...prev,
+      trackingCode: generateSecureTrackingCode()
+    }))
+  }
+
+  const handleSenderCompanyChange = (e) => {
+    const company = e.target.value
+    setFormData(prev => ({ ...prev, senderCompany: company }))
+    
+    // ✅ Tax ID réalistes pour chaque entreprise
+    const companyData = {
+      // 🇺🇸 USA
+      'DHL': { 
+        senderName: 'DHL Express', 
+        senderAddress: '1200 South Pine Island Rd, Plantation, FL 33324',
+        senderTaxId: 'DE-813729405'
+      },
+      'FedEx': { 
+        senderName: 'FedEx International', 
+        senderAddress: '942 South Shady Grove Road, Memphis, TN 38120',
+        senderTaxId: 'US-627184593'
+      },
+      'UPS': { 
+        senderName: 'UPS Worldwide', 
+        senderAddress: '55 Glenlake Parkway NE, Atlanta, GA 30328',
+        senderTaxId: 'US-549237816'
+      },
+      'USPS': { 
+        senderName: 'USPS Priority', 
+        senderAddress: '475 L\'Enfant Plaza SW, Washington, DC 20260',
+        senderTaxId: 'US-384719265'
+      },
+      'Amazon Logistics': { 
+        senderName: 'Amazon Logistics', 
+        senderAddress: '410 Terry Ave N, Seattle, WA 98109',
+        senderTaxId: 'US-927461538'
+      },
+      
+      // 🇪🇺 Europe
+      'TNT': { 
+        senderName: 'TNT Express', 
+        senderAddress: 'TNT Centre, 2132 LR Hoofddorp, Netherlands',
+        senderTaxId: 'NL-836492715'
+      },
+      'DB Schenker': { 
+        senderName: 'DB Schenker Logistics', 
+        senderAddress: 'Kruppstraße 4, 45128 Essen, Germany',
+        senderTaxId: 'DE-728394615'
+      },
+      'Kuehne + Nagel': { 
+        senderName: 'Kuehne + Nagel', 
+        senderAddress: 'Dorfstrasse 50, 8834 Schindellegi, Switzerland',
+        senderTaxId: 'CH-493827156'
+      },
+      'DSV': { 
+        senderName: 'DSV Global Transport', 
+        senderAddress: 'Hovedgaden 630, 2640 Hedehusene, Denmark',
+        senderTaxId: 'DK-572948316'
+      },
+      'XPO Logistics': { 
+        senderName: 'XPO Logistics', 
+        senderAddress: '5 American Lane, Greenwich, CT 06831',
+        senderTaxId: 'US-641738592'
+      },
+      
+      // 🌏 Asie & Océanie
+      'Yamato Transport': { 
+        senderName: 'Yamato Transport', 
+        senderAddress: '2-1-1 Shinkawa, Chuo-ku, Tokyo 104-0033, Japan',
+        senderTaxId: 'JP-382947156'
+      },
+      'Nippon Express': { 
+        senderName: 'Nippon Express', 
+        senderAddress: '2-3-1 Higashi-Shimbashi, Minato-ku, Tokyo 105-8315, Japan',
+        senderTaxId: 'JP-615847293'
+      },
+      'Toll Group': { 
+        senderName: 'Toll Group', 
+        senderAddress: '380 St Kilda Road, Melbourne, VIC 3004, Australia',
+        senderTaxId: 'AU-748392615'
+      },
+      
+      // 🌎 Autres
+      'Maersk': { 
+        senderName: 'Maersk Logistics', 
+        senderAddress: 'Esplanaden 50, 1263 Copenhagen K, Denmark',
+        senderTaxId: 'DK-637194825'
+      },
+      'Trans Dispatch': { 
+        senderName: 'Trans Dispatch Premium', 
+        senderAddress: '123 Logistics Drive, New York, NY 10001',
+        senderTaxId: 'US-736194528'
+      }
+    }
+
+    if (companyData[company]) {
+      setFormData(prev => ({
+        ...prev,
+        senderName: companyData[company].senderName,
+        senderAddress: companyData[company].senderAddress,
+        senderTaxId: companyData[company].senderTaxId,
+      }))
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      const newShipment = await createShipment({
+        ...formData,
+        status: 'pending',
+        statusHistory: [
+          {
+            status: 'pending',
+            date: new Date().toISOString(),
+            location: formData.currentLocation || 'Warehouse',
+            latitude: parseFloat(formData.currentLatitude) || 0,
+            longitude: parseFloat(formData.currentLongitude) || 0,
+            description: 'Shipment created',
+          }
+        ],
+        events: []
+      })
+      
+      if (newShipment) {
+        alert(`✅ Shipment ${newShipment.trackingCode} created successfully!`)
+        navigate('/admin')
+      }
+    } catch (error) {
+      alert('❌ Error creating shipment')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Shipment</h1>
+      
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+        {/* Tracking Code */}
+        <div className="bg-orange-50 rounded-lg p-4 border-2 border-orange-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Tracking Code
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  name="trackingCode"
+                  value={formData.trackingCode}
+                  readOnly
+                  className="flex-1 px-4 py-2 bg-white border-2 border-orange-300 rounded-lg font-mono text-lg font-bold text-orange-600 cursor-default"
+                />
+                <button
+                  type="button"
+                  onClick={handleRegenerateCode}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+                >
+                  🔄 Regenerate
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-gray-500">Priority:</span>
+              <select
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                className="px-3 py-1 border-2 border-gray-200 rounded-lg focus:border-orange-500 outline-none"
+              >
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="urgent">🔴 Urgent</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 📍 Location & Delivery */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">📍</span> Location & Delivery
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Current Location *
+              </label>
+              <input
+                type="text"
+                name="currentLocation"
+                value={formData.currentLocation}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., Los Angeles, CA"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Estimated Delivery *
+              </label>
+              <input
+                type="datetime-local"
+                name="estimatedDelivery"
+                value={formData.estimatedDelivery}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Latitude (GPS)
+              </label>
+              <input
+                type="number"
+                name="currentLatitude"
+                value={formData.currentLatitude}
+                onChange={handleChange}
+                step="any"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., 34.0522"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Longitude (GPS)
+              </label>
+              <input
+                type="number"
+                name="currentLongitude"
+                value={formData.currentLongitude}
+                onChange={handleChange}
+                step="any"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., -118.2437"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 📤 Sender - Premium Companies */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">📤</span> Sender (Premium Logistics Partner)
+          </h3>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Logistics Partner * <span className="text-xs text-gray-400">(Select a premium carrier)</span>
+            </label>
+            <select
+              name="senderCompany"
+              value={formData.senderCompany}
+              onChange={handleSenderCompanyChange}
+              className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-orange-50/50 font-medium"
+            >
+              {senderCompanies.map(company => (
+                <option key={company.value} value={company.value} className="py-2">
+                  {company.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div className="col-span-2">
+              <p className="text-xs text-gray-400 mb-2">📋 Auto-filled from selected partner</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+              <input
+                type="text"
+                name="senderName"
+                value={formData.senderName}
+                readOnly
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
+              <input
+                type="text"
+                name="senderTaxId"
+                value={formData.senderTaxId}
+                readOnly
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <input
+                type="text"
+                name="senderAddress"
+                value={formData.senderAddress}
+                readOnly
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 📬 Recipient */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">📬</span> Recipient
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+              <input
+                type="text"
+                name="recipientName"
+                value={formData.recipientName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="Jane Smith"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <input
+                type="email"
+                name="recipientEmail"
+                value={formData.recipientEmail}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="jane@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                name="recipientPhone"
+                value={formData.recipientPhone}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="+1 (555) 987-6543"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+              <input
+                type="text"
+                name="recipientAddress"
+                value={formData.recipientAddress}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="456 Oak Ave, New York, NY 10001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+              <input
+                type="text"
+                name="recipientCity"
+                value={formData.recipientCity}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="New York"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+              <input
+                type="text"
+                name="recipientPostalCode"
+                value={formData.recipientPostalCode}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="10001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+              <select
+                name="recipientCountry"
+                value={formData.recipientCountry}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="United States">United States</option>
+                <option value="Canada">Canada</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="France">France</option>
+                <option value="Germany">Germany</option>
+                <option value="Australia">Australia</option>
+                <option value="Japan">Japan</option>
+                <option value="China">China</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 📦 Package Details */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">📦</span> Package Details
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+              <input
+                type="number"
+                name="weight"
+                value={formData.weight}
+                onChange={handleChange}
+                step="0.01"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="2.50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Dimensions (L x W x H cm)</label>
+              <input
+                type="text"
+                name="dimensions"
+                value={formData.dimensions}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="30 x 20 x 15"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Declared Value (USD)</label>
+              <input
+                type="number"
+                name="declaredValue"
+                value={formData.declaredValue}
+                onChange={handleChange}
+                step="0.01"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="500.00"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Package Type</label>
+              <select
+                name="packageType"
+                value={formData.packageType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="standard">📦 Standard</option>
+                <option value="fragile">⚠️ Fragile</option>
+                <option value="urgent">🚀 Urgent</option>
+                <option value="perishable">🧊 Perishable</option>
+                <option value="oversized">📏 Oversized</option>
+                <option value="hazardous">☣️ Hazardous</option>
+                <option value="valuable">💎 Valuable</option>
+                <option value="medical">🏥 Medical</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+              <select
+                name="deliveryType"
+                value={formData.deliveryType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="standard">🐢 Standard (3-5 days)</option>
+                <option value="express">🚗 Express (1-2 days)</option>
+                <option value="same-day">⚡ Same Day</option>
+                <option value="next-day">📅 Next Day</option>
+                <option value="scheduled">📋 Scheduled</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Insurance</label>
+              <select
+                name="insuranceType"
+                value={formData.insuranceType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="none">❌ None</option>
+                <option value="basic">🛡️ Basic</option>
+                <option value="standard">🛡️ Standard</option>
+                <option value="premium">🛡️ Premium</option>
+                <option value="full">🛡️ Full Coverage</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Handling Instructions</label>
+              <select
+                name="handlingInstructions"
+                value={formData.handlingInstructions}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="">Select handling...</option>
+                <option value="forklift">Forklift required</option>
+                <option value="stackable">Stackable</option>
+                <option value="non-stackable">Non-stackable</option>
+                <option value="temperature-controlled">Temperature controlled</option>
+                <option value="hazardous">Hazardous handling</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Temperature (°C)</label>
+              <input
+                type="text"
+                name="temperature"
+                value={formData.temperature}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., 2-8°C, -20°C, Ambient"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-6 mt-4">
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                name="isFragile"
+                checked={formData.isFragile}
+                onChange={handleChange}
+                className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+              />
+              🔴 Fragile
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                name="isHazardous"
+                checked={formData.isHazardous}
+                onChange={handleChange}
+                className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+              />
+              ☣️ Hazardous
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                name="isPerishable"
+                checked={formData.isPerishable}
+                onChange={handleChange}
+                className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+              />
+              🧊 Perishable
+            </label>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+            <textarea
+              name="specialInstructions"
+              value={formData.specialInstructions}
+              onChange={handleChange}
+              rows="2"
+              className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+              placeholder="Any special delivery instructions..."
+            />
+          </div>
+        </div>
+
+        {/* 🚚 Courier */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">🚚</span> Assigned Courier
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Courier Name *
+              </label>
+              <input
+                type="text"
+                name="courierName"
+                value={formData.courierName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., Martin Marin"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Courier Email
+              </label>
+              <input
+                type="email"
+                name="courierEmail"
+                value={formData.courierEmail}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="martin.marin@trackflow.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Vehicle Type
+              </label>
+              <select
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="">Select vehicle...</option>
+                <option value="van">🚐 Delivery Van</option>
+                <option value="truck">🚛 Truck</option>
+                <option value="motorcycle">🏍️ Motorcycle</option>
+                <option value="bicycle">🚲 Bicycle</option>
+                <option value="car">🚗 Car</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 📋 Additional Info */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">📋</span> Additional Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Reference Number
+              </label>
+              <input
+                type="text"
+                name="referenceNumber"
+                value={formData.referenceNumber}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., PO-2024-1234"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cost Center
+              </label>
+              <input
+                type="text"
+                name="costCenter"
+                value={formData.costCenter}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                placeholder="e.g., CC-05-2024"
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Internal Notes (Admin only)
+            </label>
+            <textarea
+              name="internalNotes"
+              value={formData.internalNotes}
+              onChange={handleChange}
+              rows="2"
+              className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+              placeholder="Private notes for internal use..."
+            />
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="border-t pt-6 flex flex-col sm:flex-row gap-4 justify-end">
+          <button
+            type="button"
+            onClick={() => navigate('/admin')}
+            className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-8 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Creating...' : 'Create Shipment'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export default CreateShipment

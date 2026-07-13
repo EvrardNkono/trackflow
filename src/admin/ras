@@ -1,0 +1,23 @@
+📋 Données cohérentes pour un test réel
+Exemple 1 : Colis national (USA)
+Champ	Valeur
+Tracking Code	TD7X9K2M4P1 (auto-généré)
+Current Location	Los Angeles, CA
+Estimated Delivery	2026-07-20 14:30
+Latitude	34.0522
+Longitude	-118.2437
+Sender Name	John Doe
+Sender Email	john.doe@techcorp.com
+Sender Phone	+1 (310) 555-0199
+Sender Address	123 Sunset Blvd, Los Angeles, CA 90001
+Recipient Name	Jane Smith
+Recipient Email	jane.smith@client.com
+Recipient Phone	+1 (212) 555-0188
+Recipient Address	456 Broadway, New York, NY 10001
+Recipient City	New York
+Postal Code	10001
+Weight	2.5
+Package Type	standard
+Delivery Type	express
+Courier Name	Martin Marin
+Courier Phone	+1 (310) 555-0177
