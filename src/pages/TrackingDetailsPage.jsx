@@ -6,7 +6,9 @@ import {
   ArrowLeft, MapPin, Calendar, User, Phone, Mail,
   Map, Navigation, UserCheck, CalendarDays, Timer,
   ChevronRight, Circle, FileText, Flag, Shield, DollarSign,
-  Thermometer, Building, AlertTriangle, Box, Info
+  Thermometer, Building, AlertTriangle, Box, Info, XCircle,
+  Search, Edit3, CreditCard, Wallet, Banknote, Bitcoin,
+  Copy, Check, Eye, EyeOff, Receipt
 } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -20,6 +22,8 @@ const TrackingDetailsPage = () => {
   const [error, setError] = useState(null)
   const [timeRemaining, setTimeRemaining] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const fetchShipment = async () => {
@@ -93,25 +97,77 @@ const TrackingDetailsPage = () => {
     }
   }, [shipment])
 
+  // ✅ Statuts détaillés avec labels lisibles
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: 'Pending',
+      processing: 'Processing',
+      'in-transit': 'In Transit',
+      'out-for-delivery': 'Out for Delivery',
+      delivered: 'Delivered',
+      'customs-clearance': '🛃 Customs Clearance',
+      'held-by-customs': '⛔ Held by Customs',
+      'customs-inspection': '🔍 Customs Inspection',
+      'additional-docs-required': '📄 Additional Docs Required',
+      'cleared-customs': '✅ Cleared Customs',
+      'address-issue': '📍 Address Issue',
+      'incomplete-address': '⚠️ Incomplete Address',
+      'incorrect-address': '❌ Incorrect Address',
+      'security-check': '🔒 Security Check',
+      'random-inspection': '🎲 Random Inspection',
+      delayed: '⏰ Delayed',
+      damaged: '💔 Damaged',
+      lost: '❓ Lost',
+      returned: '↩️ Returned',
+      cancelled: '❌ Cancelled',
+    }
+    return labels[status] || status
+  }
+
   const statusIcons = {
     pending: Clock,
+    processing: Package,
     'in-transit': Truck,
+    'out-for-delivery': Truck,
     delivered: CheckCircle,
-    delayed: AlertCircle,
+    'customs-clearance': Shield,
+    'held-by-customs': AlertCircle,
+    'customs-inspection': Search,
+    'additional-docs-required': FileText,
+    'cleared-customs': CheckCircle,
+    'address-issue': MapPin,
+    'incomplete-address': MapPin,
+    'incorrect-address': MapPin,
+    'security-check': Shield,
+    'random-inspection': Shield,
+    delayed: Clock,
+    damaged: AlertCircle,
+    lost: AlertCircle,
+    returned: Package,
+    cancelled: XCircle,
   }
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    processing: 'bg-blue-100 text-blue-800 border-blue-200',
     'in-transit': 'bg-purple-100 text-purple-800 border-purple-200',
+    'out-for-delivery': 'bg-indigo-100 text-indigo-800 border-indigo-200',
     delivered: 'bg-green-100 text-green-800 border-green-200',
-    delayed: 'bg-red-100 text-red-800 border-red-200',
-  }
-
-  const statusLabels = {
-    pending: 'Pending',
-    'in-transit': 'In Transit',
-    delivered: 'Delivered',
-    delayed: 'Delayed',
+    'customs-clearance': 'bg-violet-100 text-violet-800 border-violet-200',
+    'held-by-customs': 'bg-red-100 text-red-800 border-red-200',
+    'customs-inspection': 'bg-orange-100 text-orange-800 border-orange-200',
+    'additional-docs-required': 'bg-amber-100 text-amber-800 border-amber-200',
+    'cleared-customs': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    'address-issue': 'bg-orange-100 text-orange-800 border-orange-200',
+    'incomplete-address': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    'incorrect-address': 'bg-red-100 text-red-800 border-red-200',
+    'security-check': 'bg-slate-100 text-slate-800 border-slate-200',
+    'random-inspection': 'bg-gray-100 text-gray-800 border-gray-200',
+    delayed: 'bg-orange-100 text-orange-800 border-orange-200',
+    damaged: 'bg-red-100 text-red-800 border-red-200',
+    lost: 'bg-gray-100 text-gray-800 border-gray-200',
+    returned: 'bg-gray-100 text-gray-800 border-gray-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200',
   }
 
   const priorityColors = {
@@ -132,12 +188,166 @@ const TrackingDetailsPage = () => {
     return priorityColors[priority] || 'bg-gray-100 text-gray-600'
   }
 
+  // Fonction pour copier dans le presse-papier
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // Rendu des détails de paiement
+  const renderPaymentDetails = () => {
+    const { paymentMethod, paymentDetails } = shipment
+    if (!paymentMethod) return null
+
+    switch (paymentMethod) {
+      case 'bank-transfer':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+            <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+              <Banknote className="w-5 h-5" />
+              Bank Transfer Details
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-gray-500">Bank Name</span>
+                <p className="font-medium text-gray-800">{paymentDetails?.bankName || 'N/A'}</p>
+              </div>
+              <div>
+                <span className="text-gray-500">Account Holder</span>
+                <p className="font-medium text-gray-800">{paymentDetails?.accountHolder || 'N/A'}</p>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-gray-500">IBAN</span>
+                <div className="flex items-center gap-2">
+                  <p className="font-mono font-medium text-gray-800 bg-white px-2 py-1 rounded border border-blue-200">
+                    {paymentDetails?.iban || 'N/A'}
+                  </p>
+                  {paymentDetails?.iban && (
+                    <button
+                      onClick={() => copyToClipboard(paymentDetails.iban)}
+                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
+              </div>
+              {paymentDetails?.bic && (
+                <div>
+                  <span className="text-gray-500">BIC / SWIFT</span>
+                  <p className="font-mono font-medium text-gray-800">{paymentDetails.bic}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+
+      case 'paypal':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+            <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+              <Wallet className="w-5 h-5" />
+              PayPal Details
+            </div>
+            <div>
+              <span className="text-gray-500">PayPal Email</span>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-gray-800 bg-white px-2 py-1 rounded border border-blue-200">
+                  {paymentDetails?.paypalEmail || 'N/A'}
+                </p>
+                {paymentDetails?.paypalEmail && (
+                  <button
+                    onClick={() => copyToClipboard(paymentDetails.paypalEmail)}
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'crypto':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+            <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+              <Bitcoin className="w-5 h-5" />
+              Crypto Details
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-gray-500">Cryptocurrency</span>
+                <p className="font-medium text-gray-800 capitalize">{paymentDetails?.cryptoType || 'N/A'}</p>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-gray-500">Wallet Address</span>
+                <div className="flex items-center gap-2">
+                  <p className="font-mono font-medium text-gray-800 bg-white px-2 py-1 rounded border border-blue-200 text-xs break-all">
+                    {paymentDetails?.cryptoWallet || 'N/A'}
+                  </p>
+                  {paymentDetails?.cryptoWallet && (
+                    <button
+                      onClick={() => copyToClipboard(paymentDetails.cryptoWallet)}
+                      className="text-blue-600 hover:text-blue-800 transition-colors flex-shrink-0"
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'cash':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+            <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+              <Banknote className="w-5 h-5" />
+              Cash Details
+            </div>
+            <div>
+              <span className="text-gray-500">Currency</span>
+              <p className="font-medium text-gray-800">{paymentDetails?.cashCurrency || 'USD'}</p>
+            </div>
+          </div>
+        )
+
+      case 'other':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+            <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+              <CreditCard className="w-5 h-5" />
+              Custom Payment Method
+            </div>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="text-gray-500">Method</span>
+                <p className="font-medium text-gray-800">{paymentDetails?.otherLabel || 'N/A'}</p>
+              </div>
+              <div>
+                <span className="text-gray-500">Details</span>
+                <p className="text-gray-700 bg-white p-2 rounded border border-blue-200 whitespace-pre-wrap">
+                  {paymentDetails?.otherDetails || 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent" />
         </div>
         <Footer />
       </div>
@@ -170,6 +380,15 @@ const TrackingDetailsPage = () => {
     ? `https://www.google.com/maps?q=${shipment.currentLatitude},${shipment.currentLongitude}`
     : `https://www.google.com/maps/search/${encodeURIComponent(shipment.currentLocation || '')}`
 
+  // Noms des méthodes de paiement pour l'affichage
+  const paymentMethodLabels = {
+    'bank-transfer': '🏦 Bank Transfer',
+    'paypal': '💰 PayPal',
+    'crypto': '₿ Crypto',
+    'cash': '💵 Cash',
+    'other': '🔗 Other'
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -189,10 +408,10 @@ const TrackingDetailsPage = () => {
                 {shipment.trackingCode}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className={`px-4 py-2 rounded-full border-2 flex items-center gap-2 ${statusColor}`}>
                 <StatusIcon className="w-5 h-5" />
-                <span className="font-semibold uppercase text-sm">{statusLabels[shipment.status] || shipment.status}</span>
+                <span className="font-semibold uppercase text-sm">{getStatusLabel(shipment.status)}</span>
               </div>
               <button
                 onClick={() => setShowReceipt(true)}
@@ -203,6 +422,14 @@ const TrackingDetailsPage = () => {
               </button>
             </div>
           </div>
+          {shipment.statusDescription && (
+            <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-sm text-gray-700 flex items-start gap-2">
+                <Info className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                <span>{shipment.statusDescription}</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Progress Bar */}
@@ -217,9 +444,12 @@ const TrackingDetailsPage = () => {
                 <div 
                   className="absolute inset-y-0 left-0 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-1000"
                   style={{ 
-                    width: shipment.status === 'pending' ? '25%' : 
-                           shipment.status === 'in-transit' ? '60%' : 
-                           shipment.status === 'delivered' ? '100%' : '40%' 
+                    width: shipment.status === 'pending' || shipment.status === 'processing' ? '15%' : 
+                           shipment.status === 'in-transit' ? '40%' : 
+                           shipment.status === 'customs-clearance' || shipment.status === 'held-by-customs' ? '50%' :
+                           shipment.status === 'cleared-customs' ? '65%' :
+                           shipment.status === 'out-for-delivery' ? '80%' : 
+                           shipment.status === 'delivered' ? '100%' : '30%' 
                   }}
                 />
               </div>
@@ -271,6 +501,80 @@ const TrackingDetailsPage = () => {
           </div>
         </div>
 
+        {/* 💳 SECTION PAIEMENT - MIS EN AVANT */}
+        {shipment.paymentMethod && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white border-2 border-white/20">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-3 rounded-full">
+                    <CreditCard className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Payment Information</h3>
+                    <p className="text-sm text-white/80">
+                      {paymentMethodLabels[shipment.paymentMethod] || shipment.paymentMethod}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowPaymentDetails(!showPaymentDetails)}
+                  className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                >
+                  {showPaymentDetails ? (
+                    <>
+                      <EyeOff className="w-4 h-4" />
+                      Hide Details
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4" />
+                      View Details
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {showPaymentDetails && (
+                <div className="mt-4 text-white">
+                  {renderPaymentDetails()}
+                </div>
+              )}
+
+              {/* Résumé rapide du paiement */}
+              <div className="mt-4 flex flex-wrap gap-4 text-sm border-t border-white/20 pt-4">
+                <div className="flex items-center gap-2">
+                  <Receipt className="w-4 h-4 opacity-80" />
+                  <span className="opacity-80">Method:</span>
+                  <span className="font-medium">{paymentMethodLabels[shipment.paymentMethod] || shipment.paymentMethod}</span>
+                </div>
+                {shipment.declaredValue && (
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 opacity-80" />
+                    <span className="opacity-80">Amount:</span>
+                    <span className="font-medium">${shipment.declaredValue}</span>
+                  </div>
+                )}
+                {shipment.insuranceType && shipment.insuranceType !== 'none' && (
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 opacity-80" />
+                    <span className="opacity-80">Insurance:</span>
+                    <span className="font-medium capitalize">{shipment.insuranceType}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Badge de statut paiement */}
+              <div className="mt-3">
+                <span className="inline-flex items-center gap-1 bg-green-400/30 px-3 py-1 rounded-full text-xs font-medium">
+                  <CheckCircle className="w-3 h-3" />
+                  Payment Confirmed
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Grid principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -319,7 +623,7 @@ const TrackingDetailsPage = () => {
               </div>
             </div>
 
-            {/* Status History */}
+            {/* Status History avec descriptions détaillées */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-orange-500" />
@@ -335,8 +639,13 @@ const TrackingDetailsPage = () => {
                       )}
                     </div>
                     <div className="flex-1 pb-4">
-                      <p className="font-medium text-gray-900">{entry.status}</p>
+                      <p className="font-medium text-gray-900">{getStatusLabel(entry.status)}</p>
                       <p className="text-sm text-gray-600">{entry.description}</p>
+                      {entry.statusDetails && (
+                        <p className="text-xs text-orange-600 mt-1 bg-orange-50 p-2 rounded-lg border border-orange-100">
+                          📌 {entry.statusDetails}
+                        </p>
+                      )}
                       <p className="text-xs text-gray-400 flex items-center gap-2 mt-1">
                         <MapPin className="w-3 h-3" />
                         {entry.location}
@@ -361,6 +670,38 @@ const TrackingDetailsPage = () => {
                 ))}
               </div>
             </div>
+
+            {/* 📋 Additional Info - Références et notes internes */}
+            {(shipment.referenceNumber || shipment.costCenter || shipment.internalNotes) && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-orange-500" />
+                  Additional Information
+                </h3>
+                <div className="space-y-3 text-sm">
+                  {shipment.referenceNumber && (
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <span className="text-gray-500">Reference Number</span>
+                      <span className="font-medium">{shipment.referenceNumber}</span>
+                    </div>
+                  )}
+                  {shipment.costCenter && (
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <span className="text-gray-500">Cost Center</span>
+                      <span className="font-medium">{shipment.costCenter}</span>
+                    </div>
+                  )}
+                  {shipment.internalNotes && (
+                    <div className="py-2">
+                      <span className="text-gray-500 block mb-1">Internal Notes</span>
+                      <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">
+                        {shipment.internalNotes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Colonne droite (1/3) */}
@@ -432,50 +773,16 @@ const TrackingDetailsPage = () => {
                   <span className="font-medium">{shipment.temperature || 'Ambient'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Handling</span>
+                  <span className="font-medium capitalize">{shipment.handlingInstructions || 'Standard'}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
                   <span className="text-gray-500">Created</span>
                   <span className="font-medium">{new Date(shipment.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-gray-500">Current Location</span>
                   <span className="font-medium text-right">{shipment.currentLocation || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Sender Info */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Building className="w-5 h-5 text-orange-500" />
-                Sender
-              </h3>
-              <div className="space-y-2 text-sm">
-                {shipment.senderCompany && (
-                  <div className="flex items-start gap-2">
-                    <Building className="w-4 h-4 text-gray-400 mt-0.5" />
-                    <span className="text-gray-700 font-medium">{shipment.senderCompany}</span>
-                  </div>
-                )}
-                {shipment.senderTaxId && (
-                  <div className="flex items-start gap-2 text-xs text-gray-500">
-                    <span className="w-4 h-4" />
-                    <span className="font-mono">Tax ID: {shipment.senderTaxId}</span>
-                  </div>
-                )}
-                <div className="flex items-start gap-2">
-                  <User className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="text-gray-700">{shipment.senderName || 'N/A'}</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Mail className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="text-gray-700">{shipment.senderEmail || 'N/A'}</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="text-gray-700">{shipment.senderPhone || 'N/A'}</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="text-gray-700">{shipment.senderAddress || 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -503,9 +810,43 @@ const TrackingDetailsPage = () => {
                   {shipment.temperature && (
                     <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">🌡️ {shipment.temperature}</span>
                   )}
+                  {shipment.handlingInstructions && shipment.handlingInstructions !== 'Select handling...' && (
+                    <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">🔧 {shipment.handlingInstructions}</span>
+                  )}
                 </div>
               </div>
             )}
+
+            {/* Sender Info */}
+<div className="bg-white rounded-xl shadow-lg p-6">
+  <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+    <Building className="w-5 h-5 text-orange-500" />
+    Sender
+  </h3>
+  <div className="space-y-2 text-sm">
+    {shipment.senderCompany && (
+      <div className="flex items-start gap-2">
+        <Building className="w-4 h-4 text-gray-400 mt-0.5" />
+        <span className="text-gray-700 font-medium">{shipment.senderCompany}</span>
+      </div>
+    )}
+    {shipment.senderTaxId && (
+      <div className="flex items-start gap-2 text-xs text-gray-500">
+        <span className="w-4 h-4" />
+        <span className="font-mono">Tax ID: {shipment.senderTaxId}</span>
+      </div>
+    )}
+    <div className="flex items-start gap-2">
+      <User className="w-4 h-4 text-gray-400 mt-0.5" />
+      <span className="text-gray-700">{shipment.senderName || 'N/A'}</span>
+    </div>
+    {/* ❌ SUPPRIMÉ : Email et Phone de l'expéditeur */}
+    <div className="flex items-start gap-2">
+      <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+      <span className="text-gray-700">{shipment.senderAddress || 'N/A'}</span>
+    </div>
+  </div>
+</div>
 
             {/* Recipient */}
             <div className="bg-white rounded-xl shadow-lg p-6">

@@ -65,6 +65,10 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             .status-in-transit { background: #ede9fe; color: #5b21b6; }
             .status-delivered { background: #d1fae5; color: #065f46; }
             .status-delayed { background: #fee2e2; color: #991b1b; }
+            .status-customs-clearance { background: #f3e8ff; color: #6b21a5; }
+            .status-address-issue { background: #ffedd5; color: #9a3412; }
+            .status-security-check { background: #f1f5f9; color: #475569; }
+            .status-cancelled { background: #fee2e2; color: #991b1b; }
             .priority-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; margin-left: 6px; }
             .priority-low { background: #f3f4f6; color: #4b5563; }
             .priority-normal { background: #dbeafe; color: #1e40af; }
@@ -74,6 +78,9 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
             .watermark { color: #f3f4f6; font-size: 120px; position: absolute; right: 20px; bottom: 20px; opacity: 0.1; font-weight: bold; }
             .flag-icon { margin-right: 4px; }
+            .payment-details { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 8px; }
+            .payment-details .row { border-bottom-color: #dcfce7; }
+            .payment-details .row:last-child { border-bottom: none; }
             @media print {
               body { background: white; }
               .receipt-container { box-shadow: none; padding: 20px; }
@@ -144,6 +151,9 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             .priority-high { background: #fed7aa; color: #9a3412; }
             .priority-urgent { background: #fecaca; color: #991b1b; }
             .watermark { color: #f3f4f6; font-size: 120px; position: absolute; right: 20px; bottom: 20px; opacity: 0.1; font-weight: bold; }
+            .payment-details { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 8px; }
+            .payment-details .row { border-bottom-color: #dcfce7; }
+            .payment-details .row:last-child { border-bottom: none; }
           </style>
         </head>
         <body>
@@ -168,19 +178,51 @@ const TrackingReceipt = ({ shipment, onClose }) => {
   const getStatusBadgeClass = (status) => {
     const classes = {
       pending: 'status-pending',
+      processing: 'status-pending',
       'in-transit': 'status-in-transit',
+      'out-for-delivery': 'status-in-transit',
       delivered: 'status-delivered',
       delayed: 'status-delayed',
+      'customs-clearance': 'status-customs-clearance',
+      'held-by-customs': 'status-customs-clearance',
+      'customs-inspection': 'status-customs-clearance',
+      'additional-docs-required': 'status-customs-clearance',
+      'cleared-customs': 'status-customs-clearance',
+      'address-issue': 'status-address-issue',
+      'incomplete-address': 'status-address-issue',
+      'incorrect-address': 'status-address-issue',
+      'security-check': 'status-security-check',
+      'random-inspection': 'status-security-check',
+      damaged: 'status-delayed',
+      lost: 'status-delayed',
+      returned: 'status-delayed',
+      cancelled: 'status-cancelled',
     }
-    return classes[status] || ''
+    return classes[status] || 'status-pending'
   }
 
   const getStatusLabel = (status) => {
     const labels = {
       pending: 'Pending',
+      processing: 'Processing',
       'in-transit': 'In Transit',
+      'out-for-delivery': 'Out for Delivery',
       delivered: 'Delivered',
-      delayed: 'Delayed',
+      'customs-clearance': '🛃 Customs Clearance',
+      'held-by-customs': '⛔ Held by Customs',
+      'customs-inspection': '🔍 Customs Inspection',
+      'additional-docs-required': '📄 Additional Docs Required',
+      'cleared-customs': '✅ Cleared Customs',
+      'address-issue': '📍 Address Issue',
+      'incomplete-address': '⚠️ Incomplete Address',
+      'incorrect-address': '❌ Incorrect Address',
+      'security-check': '🔒 Security Check',
+      'random-inspection': '🎲 Random Inspection',
+      delayed: '⏰ Delayed',
+      damaged: '💔 Damaged',
+      lost: '❓ Lost',
+      returned: '↩️ Returned',
+      cancelled: '❌ Cancelled',
     }
     return labels[status] || status
   }
@@ -193,6 +235,103 @@ const TrackingReceipt = ({ shipment, onClose }) => {
       urgent: 'priority-urgent',
     }
     return classes[priority] || 'priority-normal'
+  }
+
+  // Rendu des détails de paiement
+  const renderPaymentDetails = () => {
+    const { paymentMethod, paymentDetails } = shipment
+    if (!paymentMethod) return null
+
+    switch (paymentMethod) {
+      case 'bank-transfer':
+        return (
+          <div className="payment-details">
+            <p className="font-semibold text-sm text-green-700 mb-2">🏦 Bank Transfer</p>
+            <div className="row">
+              <span className="row-label">Bank Name</span>
+              <span className="row-value">{paymentDetails?.bankName || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">Account Holder</span>
+              <span className="row-value">{paymentDetails?.accountHolder || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">IBAN</span>
+              <span className="row-value font-mono text-xs">{paymentDetails?.iban || 'N/A'}</span>
+            </div>
+            {paymentDetails?.bic && (
+              <div className="row">
+                <span className="row-label">BIC / SWIFT</span>
+                <span className="row-value font-mono text-xs">{paymentDetails.bic}</span>
+              </div>
+            )}
+          </div>
+        )
+
+      case 'paypal':
+        return (
+          <div className="payment-details">
+            <p className="font-semibold text-sm text-green-700 mb-2">💰 PayPal</p>
+            <div className="row">
+              <span className="row-label">PayPal Email</span>
+              <span className="row-value">{paymentDetails?.paypalEmail || 'N/A'}</span>
+            </div>
+          </div>
+        )
+
+      case 'crypto':
+        return (
+          <div className="payment-details">
+            <p className="font-semibold text-sm text-green-700 mb-2">₿ Crypto</p>
+            <div className="row">
+              <span className="row-label">Cryptocurrency</span>
+              <span className="row-value capitalize">{paymentDetails?.cryptoType || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">Wallet Address</span>
+              <span className="row-value font-mono text-xs break-all">{paymentDetails?.cryptoWallet || 'N/A'}</span>
+            </div>
+          </div>
+        )
+
+      case 'cash':
+        return (
+          <div className="payment-details">
+            <p className="font-semibold text-sm text-green-700 mb-2">💵 Cash</p>
+            <div className="row">
+              <span className="row-label">Currency</span>
+              <span className="row-value">{paymentDetails?.cashCurrency || 'USD'}</span>
+            </div>
+          </div>
+        )
+
+      case 'other':
+        return (
+          <div className="payment-details">
+            <p className="font-semibold text-sm text-green-700 mb-2">🔗 Custom Payment</p>
+            <div className="row">
+              <span className="row-label">Method</span>
+              <span className="row-value">{paymentDetails?.otherLabel || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">Details</span>
+              <span className="row-value text-sm whitespace-pre-wrap">{paymentDetails?.otherDetails || 'N/A'}</span>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  // Noms des méthodes de paiement
+  const paymentMethodLabels = {
+    'bank-transfer': '🏦 Bank Transfer',
+    'paypal': '💰 PayPal',
+    'crypto': '₿ Crypto',
+    'cash': '💵 Cash',
+    'other': '🔗 Other'
   }
 
   return (
@@ -262,6 +401,14 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 </span>
               </div>
             </div>
+            {/* ✅ Description du statut */}
+            {shipment.statusDescription && (
+              <div className="mt-3 p-3 bg-white/80 rounded-lg border border-orange-200 text-left">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Status Details:</span> {shipment.statusDescription}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Grid 2 colonnes - Infos principales */}
@@ -297,6 +444,22 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 <span className="row-label">Temperature</span>
                 <span className="row-value">{shipment.temperature || 'Ambient'}</span>
               </div>
+              <div className="row">
+                <span className="row-label">Handling</span>
+                <span className="row-value capitalize">{shipment.handlingInstructions || 'Standard'}</span>
+              </div>
+              {shipment.referenceNumber && (
+                <div className="row">
+                  <span className="row-label">Reference #</span>
+                  <span className="row-value">{shipment.referenceNumber}</span>
+                </div>
+              )}
+              {shipment.costCenter && (
+                <div className="row">
+                  <span className="row-label">Cost Center</span>
+                  <span className="row-value">{shipment.costCenter}</span>
+                </div>
+              )}
             </div>
 
             {/* Delivery Info */}
@@ -316,6 +479,12 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                   <span className="row-value">{shipment.courierName}</span>
                 </div>
               )}
+              {shipment.courierEmail && (
+                <div className="row">
+                  <span className="row-label">Courier Email</span>
+                  <span className="row-value">{shipment.courierEmail}</span>
+                </div>
+              )}
               {shipment.vehicleType && (
                 <div className="row">
                   <span className="row-label">Vehicle</span>
@@ -328,8 +497,25 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                   <span className="row-value text-xs">{shipment.currentLatitude}, {shipment.currentLongitude}</span>
                 </div>
               )}
+              {/* ✅ Date de création */}
+              <div className="row">
+                <span className="row-label">Created</span>
+                <span className="row-value">{shipment.createdAt ? formatDate(shipment.createdAt) : 'N/A'}</span>
+              </div>
             </div>
           </div>
+
+          {/* 💳 Paiement */}
+          {shipment.paymentMethod && (
+            <div className="section mt-4">
+              <h3 className="section-title">💳 Payment Information</h3>
+              <div className="row">
+                <span className="row-label">Payment Method</span>
+                <span className="row-value">{paymentMethodLabels[shipment.paymentMethod] || shipment.paymentMethod}</span>
+              </div>
+              {renderPaymentDetails()}
+            </div>
+          )}
 
           {/* Sender & Recipient */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -347,14 +533,7 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 <span className="row-label">Name</span>
                 <span className="row-value">{shipment.senderName || 'N/A'}</span>
               </div>
-              <div className="row">
-                <span className="row-label">Email</span>
-                <span className="row-value">{shipment.senderEmail || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Phone</span>
-                <span className="row-value">{shipment.senderPhone || 'N/A'}</span>
-              </div>
+              {/* ❌ Email et Phone supprimés - ne pas afficher */}
               <div className="row">
                 <span className="row-label">Address</span>
                 <span className="row-value">{shipment.senderAddress || 'N/A'}</span>
@@ -371,6 +550,7 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 <span className="row-label">Email</span>
                 <span className="row-value">{shipment.recipientEmail || 'N/A'}</span>
               </div>
+              {/* ✅ Téléphone du destinataire */}
               <div className="row">
                 <span className="row-label">Phone</span>
                 <span className="row-value">{shipment.recipientPhone || 'N/A'}</span>
@@ -411,6 +591,9 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 {shipment.specialInstructions && (
                   <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">📋 {shipment.specialInstructions}</span>
                 )}
+                {shipment.handlingInstructions && shipment.handlingInstructions !== 'Select handling...' && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">🔧 {shipment.handlingInstructions}</span>
+                )}
               </div>
             </div>
           )}
@@ -419,16 +602,19 @@ const TrackingReceipt = ({ shipment, onClose }) => {
           {shipment.statusHistory && shipment.statusHistory.length > 0 && (
             <div className="section mt-4">
               <h3 className="section-title">📋 Tracking History</h3>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
                 {shipment.statusHistory.map((entry, index) => (
                   <div key={index} className="flex items-start gap-3 py-2 border-b border-gray-100">
                     <div className="w-2 h-2 mt-1.5 rounded-full bg-orange-500 flex-shrink-0"></div>
                     <div className="flex-1">
                       <div className="flex justify-between">
-                        <span className="font-medium text-sm">{entry.status}</span>
+                        <span className="font-medium text-sm">{getStatusLabel(entry.status)}</span>
                         <span className="text-xs text-gray-400">{formatDateShort(entry.date)}</span>
                       </div>
                       <p className="text-sm text-gray-600">{entry.description}</p>
+                      {entry.statusDetails && (
+                        <p className="text-xs text-orange-600 mt-1">📌 {entry.statusDetails}</p>
+                      )}
                       <p className="text-xs text-gray-400">{entry.location}</p>
                     </div>
                   </div>

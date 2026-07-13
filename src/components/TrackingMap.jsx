@@ -59,87 +59,130 @@ const TrackingMap = ({ shipment }) => {
                      shipment.recipientCity === 'Los Angeles' ? [34.0522, -118.2437] :
                      shipment.recipientCity === 'Paris' ? [48.8566, 2.3522] :
                      shipment.recipientCity === 'London' ? [51.5074, -0.1278] :
+                     shipment.recipientCity === 'Tokyo' ? [35.6762, 139.6503] :
+                     shipment.recipientCity === 'Berlin' ? [52.5200, 13.4050] :
+                     shipment.recipientCity === 'Dubai' ? [25.2048, 55.2708] :
+                     shipment.recipientCity === 'Sydney' ? [-33.8688, 151.2093] :
                      null
 
   return (
-    <div className="h-64 md:h-80 w-full rounded-lg overflow-hidden shadow-inner">
-      <MapContainer
-        center={center}
-        zoom={13}
-        scrollWheelZoom={true}
-        className="h-full w-full"
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        {/* Position actuelle du colis */}
-        {hasValidCoords && (
-          <Marker position={[currentLat, currentLng]} icon={packageIcon}>
-            <Popup>
-              <div className="text-sm">
-                <p className="font-semibold text-orange-600">📍 Current Location</p>
-                <p>{shipment.currentLocation || 'Unknown'}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Lat: {currentLat.toFixed(6)}<br />
-                  Lng: {currentLng.toFixed(6)}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Status: <span className="font-medium">{shipment.status}</span>
-                </p>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
-        {/* Destination finale */}
-        {destCoords && (
-          <Marker position={destCoords} icon={destinationIcon}>
-            <Popup>
-              <div className="text-sm">
-                <p className="font-semibold text-green-600">📦 Destination</p>
-                <p>{shipment.recipientName}</p>
-                <p className="text-xs text-gray-500">{shipment.recipientAddress}</p>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
-        {/* Trajectoire (ligne entre les points) */}
-        {historyPositions.length >= 2 && (
-          <Polyline
-            positions={historyPositions}
-            color="#ea580c"
-            weight={3}
-            opacity={0.7}
-            dashArray="5, 10"
+    <div className="relative h-64 md:h-80 w-full rounded-lg overflow-hidden shadow-inner">
+      {/* ✅ Conteneur avec z-index contrôlé */}
+      <div className="absolute inset-0" style={{ zIndex: 1 }}>
+        <MapContainer
+          center={center}
+          zoom={13}
+          scrollWheelZoom={true}
+          className="h-full w-full"
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+        >
+          {/* ✅ Réactiver les contrôles de zoom avec un z-index inférieur */}
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-        )}
 
-        {/* Affichage des points d'historique */}
-        {historyPositions.map((pos, index) => (
-          <Marker
-            key={index}
-            position={pos}
-            icon={L.divIcon({
-              className: 'bg-orange-500 rounded-full border-2 border-white shadow-md',
-              html: `<div class="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow-md"></div>`,
-              iconSize: [12, 12],
-              iconAnchor: [6, 6],
-            })}
-          >
-            <Popup>
-              <div className="text-xs">
-                <p className="font-medium">Step {index + 1}</p>
-                <p className="text-gray-500">Lat: {pos[0].toFixed(6)}</p>
-                <p className="text-gray-500">Lng: {pos[1].toFixed(6)}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+          {/* Position actuelle du colis */}
+          {hasValidCoords && (
+            <Marker position={[currentLat, currentLng]} icon={packageIcon}>
+              <Popup>
+                <div className="text-sm">
+                  <p className="font-semibold text-orange-600">📍 Current Location</p>
+                  <p>{shipment.currentLocation || 'Unknown'}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Lat: {currentLat.toFixed(6)}<br />
+                    Lng: {currentLng.toFixed(6)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Status: <span className="font-medium">{shipment.status}</span>
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* Destination finale */}
+          {destCoords && (
+            <Marker position={destCoords} icon={destinationIcon}>
+              <Popup>
+                <div className="text-sm">
+                  <p className="font-semibold text-green-600">📦 Destination</p>
+                  <p>{shipment.recipientName}</p>
+                  <p className="text-xs text-gray-500">{shipment.recipientAddress}</p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* Trajectoire (ligne entre les points) */}
+          {historyPositions.length >= 2 && (
+            <Polyline
+              positions={historyPositions}
+              color="#ea580c"
+              weight={3}
+              opacity={0.7}
+              dashArray="5, 10"
+            />
+          )}
+
+          {/* Affichage des points d'historique */}
+          {historyPositions.map((pos, index) => (
+            <Marker
+              key={index}
+              position={pos}
+              icon={L.divIcon({
+                className: 'bg-orange-500 rounded-full border-2 border-white shadow-md',
+                html: `<div class="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow-md"></div>`,
+                iconSize: [12, 12],
+                iconAnchor: [6, 6],
+              })}
+            >
+              <Popup>
+                <div className="text-xs">
+                  <p className="font-medium">Step {index + 1}</p>
+                  <p className="text-gray-500">Lat: {pos[0].toFixed(6)}</p>
+                  <p className="text-gray-500">Lng: {pos[1].toFixed(6)}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+
+      {/* ✅ Overlay pour le contrôle du z-index */}
+      <style jsx>{`
+        /* Réduire le z-index de la carte */
+        .leaflet-control-container {
+          z-index: 2 !important;
+          position: relative;
+        }
+        
+        .leaflet-top,
+        .leaflet-bottom {
+          z-index: 2 !important;
+        }
+        
+        /* Réduire le z-index des popups */
+        .leaflet-popup {
+          z-index: 3 !important;
+        }
+        
+        /* Réduire le z-index des tooltips */
+        .leaflet-tooltip {
+          z-index: 2 !important;
+        }
+        
+        /* Réduire le z-index des marqueurs */
+        .leaflet-marker-icon {
+          z-index: 2 !important;
+        }
+        
+        /* Le conteneur de la carte ne doit pas dépasser */
+        .leaflet-container {
+          z-index: 1 !important;
+        }
+      `}</style>
     </div>
   )
 }

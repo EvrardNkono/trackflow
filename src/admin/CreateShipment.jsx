@@ -55,6 +55,21 @@ const CreateShipment = () => {
     courierEmail: '',
     vehicleType: '',
     
+    // 💳 Payment Methods
+    paymentMethod: 'bank-transfer',
+    paymentDetails: {
+      bankName: '',
+      accountHolder: '',
+      iban: '',
+      bic: '',
+      paypalEmail: '',
+      cryptoWallet: '',
+      cryptoType: 'bitcoin',
+      cashCurrency: 'USD',
+      otherLabel: '',
+      otherDetails: '',
+    },
+    
     // 📋 Additional Info
     referenceNumber: '',
     costCenter: '',
@@ -64,28 +79,43 @@ const CreateShipment = () => {
 
   // 🏢 Liste des 15 entreprises expéditrices premium
   const senderCompanies = [
-    // 🇺🇸 USA
     { value: 'DHL', label: 'DHL Express' },
     { value: 'FedEx', label: 'FedEx International' },
     { value: 'UPS', label: 'UPS Worldwide' },
     { value: 'USPS', label: 'USPS Priority' },
     { value: 'Amazon Logistics', label: 'Amazon Logistics' },
-    
-    // 🇪🇺 Europe
     { value: 'TNT', label: 'TNT Express' },
     { value: 'DB Schenker', label: 'DB Schenker Logistics' },
     { value: 'Kuehne + Nagel', label: 'Kuehne + Nagel' },
     { value: 'DSV', label: 'DSV Global Transport' },
     { value: 'XPO Logistics', label: 'XPO Logistics' },
-    
-    // 🌏 Asie & Océanie
     { value: 'Yamato Transport', label: 'Yamato Transport' },
     { value: 'Nippon Express', label: 'Nippon Express' },
     { value: 'Toll Group', label: 'Toll Group' },
-    
-    // 🌎 Autres
     { value: 'Maersk', label: 'Maersk Logistics' },
     { value: 'Trans Dispatch', label: '⭐ Trans Dispatch Premium' },
+  ]
+
+  // 💳 Modes de paiement disponibles
+  const paymentMethods = [
+    { value: 'bank-transfer', label: '🏦 Bank Transfer' },
+    { value: 'paypal', label: '💰 PayPal' },
+    { value: 'crypto', label: '₿ Crypto' },
+    { value: 'cash', label: '💵 Cash' },
+    { value: 'other', label: '🔗 Other' },
+  ]
+
+  const cryptoTypes = [
+    { value: 'bitcoin', label: '₿ Bitcoin (BTC)' },
+    { value: 'ethereum', label: '⟠ Ethereum (ETH)' },
+    { value: 'usdt', label: '💵 Tether (USDT)' },
+    { value: 'usdc', label: '💵 USD Coin (USDC)' },
+    { value: 'bnb', label: '🟡 BNB' },
+    { value: 'solana', label: '◎ Solana (SOL)' },
+    { value: 'ripple', label: '✕ Ripple (XRP)' },
+    { value: 'cardano', label: '₳ Cardano (ADA)' },
+    { value: 'polkadot', label: '● Polkadot (DOT)' },
+    { value: 'dogecoin', label: '🐕 Dogecoin (DOGE)' },
   ]
 
   const handleChange = (e) => {
@@ -93,6 +123,38 @@ const CreateShipment = () => {
     setFormData(prev => ({ 
       ...prev, 
       [name]: type === 'checkbox' ? checked : value 
+    }))
+  }
+
+  const handlePaymentDetailChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      paymentDetails: {
+        ...prev.paymentDetails,
+        [name]: value
+      }
+    }))
+  }
+
+  const handlePaymentMethodChange = (e) => {
+    const value = e.target.value
+    setFormData(prev => ({
+      ...prev,
+      paymentMethod: value,
+      // Réinitialiser les détails si nécessaire
+      paymentDetails: {
+        bankName: '',
+        accountHolder: '',
+        iban: '',
+        bic: '',
+        paypalEmail: '',
+        cryptoWallet: '',
+        cryptoType: 'bitcoin',
+        cashCurrency: 'USD',
+        otherLabel: '',
+        otherDetails: '',
+      }
     }))
   }
 
@@ -107,9 +169,7 @@ const CreateShipment = () => {
     const company = e.target.value
     setFormData(prev => ({ ...prev, senderCompany: company }))
     
-    // ✅ Tax ID réalistes pour chaque entreprise
     const companyData = {
-      // 🇺🇸 USA
       'DHL': { 
         senderName: 'DHL Express', 
         senderAddress: '1200 South Pine Island Rd, Plantation, FL 33324',
@@ -135,8 +195,6 @@ const CreateShipment = () => {
         senderAddress: '410 Terry Ave N, Seattle, WA 98109',
         senderTaxId: 'US-927461538'
       },
-      
-      // 🇪🇺 Europe
       'TNT': { 
         senderName: 'TNT Express', 
         senderAddress: 'TNT Centre, 2132 LR Hoofddorp, Netherlands',
@@ -162,8 +220,6 @@ const CreateShipment = () => {
         senderAddress: '5 American Lane, Greenwich, CT 06831',
         senderTaxId: 'US-641738592'
       },
-      
-      // 🌏 Asie & Océanie
       'Yamato Transport': { 
         senderName: 'Yamato Transport', 
         senderAddress: '2-1-1 Shinkawa, Chuo-ku, Tokyo 104-0033, Japan',
@@ -179,8 +235,6 @@ const CreateShipment = () => {
         senderAddress: '380 St Kilda Road, Melbourne, VIC 3004, Australia',
         senderTaxId: 'AU-748392615'
       },
-      
-      // 🌎 Autres
       'Maersk': { 
         senderName: 'Maersk Logistics', 
         senderAddress: 'Esplanaden 50, 1263 Copenhagen K, Denmark',
@@ -232,6 +286,187 @@ const CreateShipment = () => {
       alert('❌ Error creating shipment')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  // Rendu des champs de paiement dynamiques
+  const renderPaymentFields = () => {
+    switch (formData.paymentMethod) {
+      case 'bank-transfer':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="col-span-2">
+              <p className="text-xs text-blue-600 font-semibold mb-2">🏦 Bank Transfer Details</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name *</label>
+              <input
+                type="text"
+                name="bankName"
+                value={formData.paymentDetails.bankName}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., Barclays Bank"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder *</label>
+              <input
+                type="text"
+                name="accountHolder"
+                value={formData.paymentDetails.accountHolder}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., Track Flow Ltd"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">IBAN *</label>
+              <input
+                type="text"
+                name="iban"
+                value={formData.paymentDetails.iban}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., GB29NWBK60161331926819"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">BIC / SWIFT</label>
+              <input
+                type="text"
+                name="bic"
+                value={formData.paymentDetails.bic}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., NWBKGB2L"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+          </div>
+        )
+
+      case 'paypal':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">💰 PayPal Details</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Email *</label>
+              <input
+                type="email"
+                name="paypalEmail"
+                value={formData.paymentDetails.paypalEmail}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., payments@trackflow.com"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                required
+              />
+            </div>
+          </div>
+        )
+
+      case 'crypto':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">₿ Crypto Details</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cryptocurrency *</label>
+                <select
+                  name="cryptoType"
+                  value={formData.paymentDetails.cryptoType}
+                  onChange={handlePaymentDetailChange}
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  required
+                >
+                  {cryptoTypes.map(crypto => (
+                    <option key={crypto.value} value={crypto.value}>
+                      {crypto.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wallet Address *</label>
+                <input
+                  type="text"
+                  name="cryptoWallet"
+                  value={formData.paymentDetails.cryptoWallet}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., 0x1234567890abcdef..."
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'cash':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">💵 Cash Details</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Currency *</label>
+              <select
+                name="cashCurrency"
+                value={formData.paymentDetails.cashCurrency}
+                onChange={handlePaymentDetailChange}
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                required
+              >
+                <option value="USD">💵 USD</option>
+                <option value="EUR">💶 EUR</option>
+                <option value="GBP">💷 GBP</option>
+                <option value="CAD">🇨🇦 CAD</option>
+                <option value="AUD">🇦🇺 AUD</option>
+                <option value="JPY">🇯🇵 JPY</option>
+                <option value="CHF">🇨🇭 CHF</option>
+                <option value="CNY">🇨🇳 CNY</option>
+                <option value="XOF">🇫🇷 CFA</option>
+                <option value="NGN">🇳🇬 NGN</option>
+              </select>
+            </div>
+          </div>
+        )
+
+      case 'other':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">🔗 Custom Payment Method</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method Name *</label>
+                <input
+                  type="text"
+                  name="otherLabel"
+                  value={formData.paymentDetails.otherLabel}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., Western Union, MoneyGram, etc."
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details *</label>
+                <textarea
+                  name="otherDetails"
+                  value={formData.paymentDetails.otherDetails}
+                  onChange={handlePaymentDetailChange}
+                  rows="3"
+                  placeholder="Enter all necessary payment details (account number, reference, instructions, etc.)"
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
     }
   }
 
@@ -726,6 +961,33 @@ const CreateShipment = () => {
               </select>
             </div>
           </div>
+        </div>
+
+        {/* 💳 Payment Methods - NOUVEAU */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">💳</span> Payment Methods
+          </h3>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Payment Method *
+            </label>
+            <select
+              value={formData.paymentMethod}
+              onChange={handlePaymentMethodChange}
+              className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-orange-50/50 font-medium"
+            >
+              {paymentMethods.map(method => (
+                <option key={method.value} value={method.value}>
+                  {method.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Champs dynamiques selon le mode de paiement */}
+          {renderPaymentFields()}
         </div>
 
         {/* 📋 Additional Info */}

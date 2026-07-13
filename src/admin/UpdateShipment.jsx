@@ -11,51 +11,288 @@ import useShipments from '../hooks/useShipments'
 const UpdateShipment = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { shipments, updateStatus, updateLocation, updateEstimatedDelivery, updateCourier, loading } = useShipments()
+  const { shipments, updateShipment, loading } = useShipments()
   const [shipment, setShipment] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
-    status: 'pending',
+    // 📍 Location & Delivery
     currentLocation: '',
     currentLatitude: '',
     currentLongitude: '',
     estimatedDelivery: '',
+    
+    // 📤 Sender (Liste d'entreprises premium)
+    senderCompany: 'DHL',
+    senderName: '',
+    senderEmail: '',
+    senderPhone: '',
+    senderAddress: '',
+    senderTaxId: '',
+    
+    // 📬 Recipient
+    recipientName: '',
+    recipientEmail: '',
+    recipientPhone: '',
+    recipientAddress: '',
+    recipientCity: '',
+    recipientPostalCode: '',
+    recipientCountry: 'United States',
+    
+    // 📦 Package Details
+    weight: '',
+    dimensions: '',
+    packageType: 'standard',
+    deliveryType: 'standard',
+    deliveryDate: '',
+    declaredValue: '',
+    insuranceType: 'none',
+    handlingInstructions: '',
+    specialInstructions: '',
+    temperature: '',
+    isHazardous: false,
+    isFragile: false,
+    isPerishable: false,
+    
+    // 🚚 Courier
     courierName: '',
     courierEmail: '',
     vehicleType: '',
-    statusNote: '',
+    
+    // 💳 Payment Methods
+    paymentMethod: 'bank-transfer',
+    paymentDetails: {
+      bankName: '',
+      accountHolder: '',
+      iban: '',
+      bic: '',
+      paypalEmail: '',
+      cryptoWallet: '',
+      cryptoType: 'bitcoin',
+      cashCurrency: 'USD',
+      otherLabel: '',
+      otherDetails: '',
+    },
+    
+    // 📋 Additional Info
+    referenceNumber: '',
+    costCenter: '',
+    internalNotes: '',
     priority: 'normal',
-    insuranceType: 'none',
-    declaredValue: '',
-    temperature: '',
-    specialInstructions: '',
-    isFragile: false,
-    isHazardous: false,
-    isPerishable: false,
+    
+    // 📊 Status
+    status: 'pending',
+    statusNote: '',
   })
+
+  // 🏢 Liste des 15 entreprises expéditrices premium
+  const senderCompanies = [
+    { value: 'DHL', label: 'DHL Express' },
+    { value: 'FedEx', label: 'FedEx International' },
+    { value: 'UPS', label: 'UPS Worldwide' },
+    { value: 'USPS', label: 'USPS Priority' },
+    { value: 'Amazon Logistics', label: 'Amazon Logistics' },
+    { value: 'TNT', label: 'TNT Express' },
+    { value: 'DB Schenker', label: 'DB Schenker Logistics' },
+    { value: 'Kuehne + Nagel', label: 'Kuehne + Nagel' },
+    { value: 'DSV', label: 'DSV Global Transport' },
+    { value: 'XPO Logistics', label: 'XPO Logistics' },
+    { value: 'Yamato Transport', label: 'Yamato Transport' },
+    { value: 'Nippon Express', label: 'Nippon Express' },
+    { value: 'Toll Group', label: 'Toll Group' },
+    { value: 'Maersk', label: 'Maersk Logistics' },
+    { value: 'Trans Dispatch', label: '⭐ Trans Dispatch Premium' },
+  ]
+
+  // 💳 Modes de paiement disponibles
+  const paymentMethods = [
+    { value: 'bank-transfer', label: '🏦 Bank Transfer' },
+    { value: 'paypal', label: '💰 PayPal' },
+    { value: 'crypto', label: '₿ Crypto' },
+    { value: 'cash', label: '💵 Cash' },
+    { value: 'other', label: '🔗 Other' },
+  ]
+
+  const cryptoTypes = [
+    { value: 'bitcoin', label: '₿ Bitcoin (BTC)' },
+    { value: 'ethereum', label: '⟠ Ethereum (ETH)' },
+    { value: 'usdt', label: '💵 Tether (USDT)' },
+    { value: 'usdc', label: '💵 USD Coin (USDC)' },
+    { value: 'bnb', label: '🟡 BNB' },
+    { value: 'solana', label: '◎ Solana (SOL)' },
+    { value: 'ripple', label: '✕ Ripple (XRP)' },
+    { value: 'cardano', label: '₳ Cardano (ADA)' },
+    { value: 'polkadot', label: '● Polkadot (DOT)' },
+    { value: 'dogecoin', label: '🐕 Dogecoin (DOGE)' },
+  ]
+
+  const statusOptions = [
+    { value: 'pending', label: '⏳ Pending' },
+    { value: 'processing', label: '🔄 Processing' },
+    { value: 'in-transit', label: '🚚 In Transit' },
+    { value: 'delivered', label: '✅ Delivered' },
+    { value: 'delayed', label: '⚠️ Delayed' },
+    { value: 'cancelled', label: '❌ Cancelled' },
+  ]
+
+  const priorityOptions = [
+    { value: 'low', label: 'Low' },
+    { value: 'normal', label: 'Normal' },
+    { value: 'high', label: 'High' },
+    { value: 'urgent', label: '🔴 Urgent' },
+  ]
+
+  const insuranceOptions = [
+    { value: 'none', label: '❌ None' },
+    { value: 'basic', label: '🛡️ Basic' },
+    { value: 'standard', label: '🛡️ Standard' },
+    { value: 'premium', label: '🛡️ Premium' },
+    { value: 'full', label: '🛡️ Full Coverage' },
+  ]
+
+  const vehicleOptions = [
+    { value: '', label: 'Select vehicle...' },
+    { value: 'van', label: '🚐 Delivery Van' },
+    { value: 'truck', label: '🚛 Truck' },
+    { value: 'motorcycle', label: '🏍️ Motorcycle' },
+    { value: 'bicycle', label: '🚲 Bicycle' },
+    { value: 'car', label: '🚗 Car' },
+  ]
+
+  const COMPANY_DATA = {
+    'DHL': { 
+      senderName: 'DHL Express', 
+      senderAddress: '1200 South Pine Island Rd, Plantation, FL 33324',
+      senderTaxId: 'DE-813729405'
+    },
+    'FedEx': { 
+      senderName: 'FedEx International', 
+      senderAddress: '942 South Shady Grove Road, Memphis, TN 38120',
+      senderTaxId: 'US-627184593'
+    },
+    'UPS': { 
+      senderName: 'UPS Worldwide', 
+      senderAddress: '55 Glenlake Parkway NE, Atlanta, GA 30328',
+      senderTaxId: 'US-549237816'
+    },
+    'USPS': { 
+      senderName: 'USPS Priority', 
+      senderAddress: '475 L\'Enfant Plaza SW, Washington, DC 20260',
+      senderTaxId: 'US-384719265'
+    },
+    'Amazon Logistics': { 
+      senderName: 'Amazon Logistics', 
+      senderAddress: '410 Terry Ave N, Seattle, WA 98109',
+      senderTaxId: 'US-927461538'
+    },
+    'TNT': { 
+      senderName: 'TNT Express', 
+      senderAddress: 'TNT Centre, 2132 LR Hoofddorp, Netherlands',
+      senderTaxId: 'NL-836492715'
+    },
+    'DB Schenker': { 
+      senderName: 'DB Schenker Logistics', 
+      senderAddress: 'Kruppstraße 4, 45128 Essen, Germany',
+      senderTaxId: 'DE-728394615'
+    },
+    'Kuehne + Nagel': { 
+      senderName: 'Kuehne + Nagel', 
+      senderAddress: 'Dorfstrasse 50, 8834 Schindellegi, Switzerland',
+      senderTaxId: 'CH-493827156'
+    },
+    'DSV': { 
+      senderName: 'DSV Global Transport', 
+      senderAddress: 'Hovedgaden 630, 2640 Hedehusene, Denmark',
+      senderTaxId: 'DK-572948316'
+    },
+    'XPO Logistics': { 
+      senderName: 'XPO Logistics', 
+      senderAddress: '5 American Lane, Greenwich, CT 06831',
+      senderTaxId: 'US-641738592'
+    },
+    'Yamato Transport': { 
+      senderName: 'Yamato Transport', 
+      senderAddress: '2-1-1 Shinkawa, Chuo-ku, Tokyo 104-0033, Japan',
+      senderTaxId: 'JP-382947156'
+    },
+    'Nippon Express': { 
+      senderName: 'Nippon Express', 
+      senderAddress: '2-3-1 Higashi-Shimbashi, Minato-ku, Tokyo 105-8315, Japan',
+      senderTaxId: 'JP-615847293'
+    },
+    'Toll Group': { 
+      senderName: 'Toll Group', 
+      senderAddress: '380 St Kilda Road, Melbourne, VIC 3004, Australia',
+      senderTaxId: 'AU-748392615'
+    },
+    'Maersk': { 
+      senderName: 'Maersk Logistics', 
+      senderAddress: 'Esplanaden 50, 1263 Copenhagen K, Denmark',
+      senderTaxId: 'DK-637194825'
+    },
+    'Trans Dispatch': { 
+      senderName: 'Trans Dispatch Premium', 
+      senderAddress: '123 Logistics Drive, New York, NY 10001',
+      senderTaxId: 'US-736194528'
+    }
+  }
 
   useEffect(() => {
     const found = shipments.find(s => s.id === id)
     if (found) {
       setShipment(found)
       setFormData({
-        status: found.status || 'pending',
         currentLocation: found.currentLocation || '',
         currentLatitude: found.currentLatitude || '',
         currentLongitude: found.currentLongitude || '',
         estimatedDelivery: found.estimatedDelivery || '',
+        senderCompany: found.senderCompany || 'DHL',
+        senderName: found.senderName || '',
+        senderEmail: found.senderEmail || '',
+        senderPhone: found.senderPhone || '',
+        senderAddress: found.senderAddress || '',
+        senderTaxId: found.senderTaxId || '',
+        recipientName: found.recipientName || '',
+        recipientEmail: found.recipientEmail || '',
+        recipientPhone: found.recipientPhone || '',
+        recipientAddress: found.recipientAddress || '',
+        recipientCity: found.recipientCity || '',
+        recipientPostalCode: found.recipientPostalCode || '',
+        recipientCountry: found.recipientCountry || 'United States',
+        weight: found.weight || '',
+        dimensions: found.dimensions || '',
+        packageType: found.packageType || 'standard',
+        deliveryType: found.deliveryType || 'standard',
+        deliveryDate: found.deliveryDate || '',
+        declaredValue: found.declaredValue || '',
+        insuranceType: found.insuranceType || 'none',
+        handlingInstructions: found.handlingInstructions || '',
+        specialInstructions: found.specialInstructions || '',
+        temperature: found.temperature || '',
+        isHazardous: found.isHazardous || false,
+        isFragile: found.isFragile || false,
+        isPerishable: found.isPerishable || false,
         courierName: found.courierName || '',
         courierEmail: found.courierEmail || '',
         vehicleType: found.vehicleType || '',
-        statusNote: '',
+        paymentMethod: found.paymentMethod || 'bank-transfer',
+        paymentDetails: found.paymentDetails || {
+          bankName: '',
+          accountHolder: '',
+          iban: '',
+          bic: '',
+          paypalEmail: '',
+          cryptoWallet: '',
+          cryptoType: 'bitcoin',
+          cashCurrency: 'USD',
+          otherLabel: '',
+          otherDetails: '',
+        },
+        referenceNumber: found.referenceNumber || '',
+        costCenter: found.costCenter || '',
+        internalNotes: found.internalNotes || '',
         priority: found.priority || 'normal',
-        insuranceType: found.insuranceType || 'none',
-        declaredValue: found.declaredValue || '',
-        temperature: found.temperature || '',
-        specialInstructions: found.specialInstructions || '',
-        isFragile: found.isFragile || false,
-        isHazardous: found.isHazardous || false,
-        isPerishable: found.isPerishable || false,
+        status: found.status || 'pending',
+        statusNote: '',
       })
     }
   }, [shipments, id])
@@ -68,50 +305,246 @@ const UpdateShipment = () => {
     }))
   }
 
+  const handlePaymentDetailChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      paymentDetails: {
+        ...prev.paymentDetails,
+        [name]: value
+      }
+    }))
+  }
+
+  const handlePaymentMethodChange = (e) => {
+    const value = e.target.value
+    setFormData(prev => ({
+      ...prev,
+      paymentMethod: value,
+      paymentDetails: {
+        bankName: '',
+        accountHolder: '',
+        iban: '',
+        bic: '',
+        paypalEmail: '',
+        cryptoWallet: '',
+        cryptoType: 'bitcoin',
+        cashCurrency: 'USD',
+        otherLabel: '',
+        otherDetails: '',
+      }
+    }))
+  }
+
+  const handleSenderCompanyChange = (e) => {
+    const company = e.target.value
+    const companyInfo = COMPANY_DATA[company] || {}
+    
+    setFormData(prev => ({
+      ...prev,
+      senderCompany: company,
+      ...companyInfo
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
-      // Mise à jour du statut
-      if (formData.status !== shipment.status) {
-        await updateStatus(
-          id,
-          formData.status,
-          formData.currentLocation || shipment.currentLocation,
-          formData.statusNote || `Status changed to ${formData.status}`
-        )
+      // Préparer les données à mettre à jour
+      const updateData = {
+        ...formData,
+        updatedAt: new Date().toISOString(),
+        // Convertir les nombres
+        weight: formData.weight ? parseFloat(formData.weight) : null,
+        declaredValue: formData.declaredValue ? parseFloat(formData.declaredValue) : null,
+        currentLatitude: formData.currentLatitude ? parseFloat(formData.currentLatitude) : null,
+        currentLongitude: formData.currentLongitude ? parseFloat(formData.currentLongitude) : null,
       }
 
-      // Mise à jour de la position
-      if (formData.currentLocation !== shipment.currentLocation) {
-        await updateLocation(
-          id,
-          formData.currentLocation,
-          parseFloat(formData.currentLatitude) || null,
-          parseFloat(formData.currentLongitude) || null
-        )
-      }
-
-      // Mise à jour de la date d'arrivée
-      if (formData.estimatedDelivery !== shipment.estimatedDelivery) {
-        await updateEstimatedDelivery(id, formData.estimatedDelivery)
-      }
-
-      // Mise à jour du livreur
-      if (formData.courierName !== shipment.courierName || 
-          formData.courierEmail !== shipment.courierEmail || 
-          formData.vehicleType !== shipment.vehicleType) {
-        await updateCourier(id, formData.courierName, formData.courierEmail, formData.vehicleType)
-      }
+      // Appel à l'API de mise à jour
+      await updateShipment(id, updateData)
 
       alert('✅ Shipment updated successfully!')
       navigate('/admin/shipments')
     } catch (error) {
       console.error('Error updating shipment:', error)
-      alert('❌ Error updating shipment')
+      alert(`❌ Error updating shipment: ${error.message || 'Unknown error'}`)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  // Rendu des champs de paiement dynamiques
+  const renderPaymentFields = () => {
+    switch (formData.paymentMethod) {
+      case 'bank-transfer':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="col-span-2">
+              <p className="text-xs text-blue-600 font-semibold mb-2">🏦 Bank Transfer Details</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name *</label>
+              <input
+                type="text"
+                name="bankName"
+                value={formData.paymentDetails.bankName}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., Barclays Bank"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder *</label>
+              <input
+                type="text"
+                name="accountHolder"
+                value={formData.paymentDetails.accountHolder}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., Track Flow Ltd"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">IBAN *</label>
+              <input
+                type="text"
+                name="iban"
+                value={formData.paymentDetails.iban}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., GB29NWBK60161331926819"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">BIC / SWIFT</label>
+              <input
+                type="text"
+                name="bic"
+                value={formData.paymentDetails.bic}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., NWBKGB2L"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+          </div>
+        )
+
+      case 'paypal':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">💰 PayPal Details</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Email *</label>
+              <input
+                type="email"
+                name="paypalEmail"
+                value={formData.paymentDetails.paypalEmail}
+                onChange={handlePaymentDetailChange}
+                placeholder="e.g., payments@trackflow.com"
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+          </div>
+        )
+
+      case 'crypto':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">₿ Crypto Details</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cryptocurrency *</label>
+                <select
+                  name="cryptoType"
+                  value={formData.paymentDetails.cryptoType}
+                  onChange={handlePaymentDetailChange}
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                >
+                  {cryptoTypes.map(crypto => (
+                    <option key={crypto.value} value={crypto.value}>
+                      {crypto.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wallet Address *</label>
+                <input
+                  type="text"
+                  name="cryptoWallet"
+                  value={formData.paymentDetails.cryptoWallet}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., 0x1234567890abcdef..."
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'cash':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">💵 Cash Details</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Currency *</label>
+              <select
+                name="cashCurrency"
+                value={formData.paymentDetails.cashCurrency}
+                onChange={handlePaymentDetailChange}
+                className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              >
+                <option value="USD">💵 USD</option>
+                <option value="EUR">💶 EUR</option>
+                <option value="GBP">💷 GBP</option>
+                <option value="CAD">🇨🇦 CAD</option>
+                <option value="AUD">🇦🇺 AUD</option>
+                <option value="JPY">🇯🇵 JPY</option>
+                <option value="CHF">🇨🇭 CHF</option>
+                <option value="CNY">🇨🇳 CNY</option>
+                <option value="XOF">🇫🇷 CFA</option>
+                <option value="NGN">🇳🇬 NGN</option>
+              </select>
+            </div>
+          </div>
+        )
+
+      case 'other':
+        return (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-600 font-semibold mb-2">🔗 Custom Payment Method</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method Name *</label>
+                <input
+                  type="text"
+                  name="otherLabel"
+                  value={formData.paymentDetails.otherLabel}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., Western Union, MoneyGram, etc."
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details *</label>
+                <textarea
+                  name="otherDetails"
+                  value={formData.paymentDetails.otherDetails}
+                  onChange={handlePaymentDetailChange}
+                  rows="3"
+                  placeholder="Enter all necessary payment details (account number, reference, instructions, etc.)"
+                  className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+                />
+              </div>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
     }
   }
 
@@ -123,38 +556,6 @@ const UpdateShipment = () => {
     )
   }
 
-  const statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'processing', label: 'Processing' },
-    { value: 'in-transit', label: 'In Transit' },
-    { value: 'delivered', label: 'Delivered' },
-    { value: 'delayed', label: 'Delayed' },
-  ]
-
-  const priorityOptions = [
-    { value: 'low', label: 'Low' },
-    { value: 'normal', label: 'Normal' },
-    { value: 'high', label: 'High' },
-    { value: 'urgent', label: '🔴 Urgent' },
-  ]
-
-  const insuranceOptions = [
-    { value: 'none', label: 'None' },
-    { value: 'basic', label: 'Basic' },
-    { value: 'standard', label: 'Standard' },
-    { value: 'premium', label: 'Premium' },
-    { value: 'full', label: 'Full Coverage' },
-  ]
-
-  const vehicleOptions = [
-    { value: '', label: 'Select vehicle...' },
-    { value: 'van', label: '🚐 Delivery Van' },
-    { value: 'truck', label: '🚛 Truck' },
-    { value: 'motorcycle', label: '🏍️ Motorcycle' },
-    { value: 'bicycle', label: '🚲 Bicycle' },
-    { value: 'car', label: '🚗 Car' },
-  ]
-
   return (
     <div>
       {/* Header */}
@@ -163,131 +564,87 @@ const UpdateShipment = () => {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">Update Shipment</h1>
+        <span className="ml-auto text-sm text-gray-500">
+          <span className="font-mono font-bold text-orange-600">{shipment.trackingCode}</span>
+        </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Form */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-            {/* Tracking Code */}
-            <div className="bg-orange-50 rounded-lg p-4 border-2 border-orange-200">
-              <div className="flex items-center gap-4">
-                <Package className="w-5 h-5 text-orange-600" />
+            {/* Status Section */}
+            <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Tracking Code</p>
-                  <p className="text-lg font-mono font-bold text-orange-600">{shipment.trackingCode}</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status *
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  >
+                    {statusOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Priority
+                  </label>
+                  <select
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  >
+                    {priorityOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status Note
+                  </label>
+                  <input
+                    type="text"
+                    name="statusNote"
+                    value={formData.statusNote}
+                    onChange={handleChange}
+                    placeholder="e.g., Package left warehouse"
+                    className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status *
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                >
-                  {statusOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Priority
-                </label>
-                <select
-                  name="priority"
-                  value={formData.priority}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                >
-                  {priorityOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Status Note */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status Note
-              </label>
-              <input
-                type="text"
-                name="statusNote"
-                value={formData.statusNote}
-                onChange={handleChange}
-                placeholder="e.g., Package left warehouse"
-                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-              />
-            </div>
-
-            {/* Location */}
-            <div className="border-t pt-4">
+            {/* 📍 Location & Delivery */}
+            <div className="border-t pt-6">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-orange-500" />
-                Location
+                <span className="text-orange-500">📍</span> Location & Delivery
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Location
+                    Current Location *
                   </label>
                   <input
                     type="text"
                     name="currentLocation"
                     value={formData.currentLocation}
                     onChange={handleChange}
-                    placeholder="e.g., Los Angeles, CA"
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="e.g., Los Angeles, CA"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    GPS Coordinates (optional)
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="number"
-                      name="currentLatitude"
-                      value={formData.currentLatitude}
-                      onChange={handleChange}
-                      step="any"
-                      placeholder="Latitude"
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                    />
-                    <input
-                      type="number"
-                      name="currentLongitude"
-                      value={formData.currentLongitude}
-                      onChange={handleChange}
-                      step="any"
-                      placeholder="Longitude"
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Delivery & Insurance */}
-            <div className="border-t pt-4">
-              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-orange-500" />
-                Delivery & Insurance
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Estimated Delivery
@@ -302,8 +659,291 @@ const UpdateShipment = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Insurance
+                    Latitude (GPS)
                   </label>
+                  <input
+                    type="number"
+                    name="currentLatitude"
+                    value={formData.currentLatitude}
+                    onChange={handleChange}
+                    step="any"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="e.g., 34.0522"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Longitude (GPS)
+                  </label>
+                  <input
+                    type="number"
+                    name="currentLongitude"
+                    value={formData.currentLongitude}
+                    onChange={handleChange}
+                    step="any"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="e.g., -118.2437"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 📤 Sender - Premium Companies */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-orange-500">📤</span> Sender (Premium Logistics Partner)
+              </h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Logistics Partner * <span className="text-xs text-gray-400">(Select a premium carrier)</span>
+                </label>
+                <select
+                  name="senderCompany"
+                  value={formData.senderCompany}
+                  onChange={handleSenderCompanyChange}
+                  className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-orange-50/50 font-medium"
+                >
+                  {senderCompanies.map(company => (
+                    <option key={company.value} value={company.value} className="py-2">
+                      {company.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-400 mb-2">📋 Auto-filled from selected partner</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                  <input
+                    type="text"
+                    name="senderName"
+                    value={formData.senderName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
+                  <input
+                    type="text"
+                    name="senderTaxId"
+                    value={formData.senderTaxId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="senderEmail"
+                    value={formData.senderEmail}
+                    onChange={handleChange}
+                    placeholder="sender@company.com"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    name="senderPhone"
+                    value={formData.senderPhone}
+                    onChange={handleChange}
+                    placeholder="+1 (555) 123-4567"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <input
+                    type="text"
+                    name="senderAddress"
+                    value={formData.senderAddress}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 📬 Recipient */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-orange-500">📬</span> Recipient
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    name="recipientName"
+                    value={formData.recipientName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="Jane Smith"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    name="recipientEmail"
+                    value={formData.recipientEmail}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="jane@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    name="recipientPhone"
+                    value={formData.recipientPhone}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="+1 (555) 987-6543"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <input
+                    type="text"
+                    name="recipientAddress"
+                    value={formData.recipientAddress}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="456 Oak Ave, New York, NY 10001"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <input
+                    type="text"
+                    name="recipientCity"
+                    value={formData.recipientCity}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="New York"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                  <input
+                    type="text"
+                    name="recipientPostalCode"
+                    value={formData.recipientPostalCode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="10001"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                  <select
+                    name="recipientCountry"
+                    value={formData.recipientCountry}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  >
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="France">France</option>
+                    <option value="Germany">Germany</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Japan">Japan</option>
+                    <option value="China">China</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* 📦 Package Details */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-orange-500">📦</span> Package Details
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                  <input
+                    type="number"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleChange}
+                    step="0.01"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="2.50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dimensions (L x W x H cm)</label>
+                  <input
+                    type="text"
+                    name="dimensions"
+                    value={formData.dimensions}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="30 x 20 x 15"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Declared Value (USD)</label>
+                  <input
+                    type="number"
+                    name="declaredValue"
+                    value={formData.declaredValue}
+                    onChange={handleChange}
+                    step="0.01"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="500.00"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Package Type</label>
+                  <select
+                    name="packageType"
+                    value={formData.packageType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  >
+                    <option value="standard">📦 Standard</option>
+                    <option value="fragile">⚠️ Fragile</option>
+                    <option value="urgent">🚀 Urgent</option>
+                    <option value="perishable">🧊 Perishable</option>
+                    <option value="oversized">📏 Oversized</option>
+                    <option value="hazardous">☣️ Hazardous</option>
+                    <option value="valuable">💎 Valuable</option>
+                    <option value="medical">🏥 Medical</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+                  <select
+                    name="deliveryType"
+                    value={formData.deliveryType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  >
+                    <option value="standard">🐢 Standard (3-5 days)</option>
+                    <option value="express">🚗 Express (1-2 days)</option>
+                    <option value="same-day">⚡ Same Day</option>
+                    <option value="next-day">📅 Next Day</option>
+                    <option value="scheduled">📋 Scheduled</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Insurance</label>
                   <select
                     name="insuranceType"
                     value={formData.insuranceType}
@@ -317,66 +957,39 @@ const UpdateShipment = () => {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Declared Value (USD)
-                  </label>
-                  <input
-                    type="number"
-                    name="declaredValue"
-                    value={formData.declaredValue}
-                    onChange={handleChange}
-                    step="0.01"
-                    placeholder="500.00"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                  />
-                </div>
               </div>
-            </div>
 
-            {/* Temperature & Special Instructions */}
-            <div className="border-t pt-4">
-              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Thermometer className="w-5 h-5 text-orange-500" />
-                Special Conditions
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Temperature (°C)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Handling Instructions</label>
+                  <select
+                    name="handlingInstructions"
+                    value={formData.handlingInstructions}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  >
+                    <option value="">Select handling...</option>
+                    <option value="forklift">Forklift required</option>
+                    <option value="stackable">Stackable</option>
+                    <option value="non-stackable">Non-stackable</option>
+                    <option value="temperature-controlled">Temperature controlled</option>
+                    <option value="hazardous">Hazardous handling</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Temperature (°C)</label>
                   <input
                     type="text"
                     name="temperature"
                     value={formData.temperature}
                     onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                     placeholder="e.g., 2-8°C, -20°C, Ambient"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Special Instructions
-                  </label>
-                  <input
-                    type="text"
-                    name="specialInstructions"
-                    value={formData.specialInstructions}
-                    onChange={handleChange}
-                    placeholder="Any special instructions..."
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Special Flags */}
-            <div className="border-t pt-4">
-              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-orange-500" />
-                Special Flags
-              </h3>
-              <div className="flex flex-wrap gap-6">
+              <div className="flex flex-wrap gap-6 mt-4">
                 <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
                     type="checkbox"
@@ -408,13 +1021,24 @@ const UpdateShipment = () => {
                   🧊 Perishable
                 </label>
               </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+                <textarea
+                  name="specialInstructions"
+                  value={formData.specialInstructions}
+                  onChange={handleChange}
+                  rows="2"
+                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+                  placeholder="Any special delivery instructions..."
+                />
+              </div>
             </div>
 
-            {/* Courier */}
-            <div className="border-t pt-4">
+            {/* 🚚 Courier */}
+            <div className="border-t pt-6">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Truck className="w-5 h-5 text-orange-500" />
-                Courier
+                <span className="text-orange-500">🚚</span> Assigned Courier
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -426,8 +1050,8 @@ const UpdateShipment = () => {
                     name="courierName"
                     value={formData.courierName}
                     onChange={handleChange}
-                    placeholder="e.g., Martin Marin"
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="e.g., Martin Marin"
                   />
                 </div>
                 <div>
@@ -439,8 +1063,8 @@ const UpdateShipment = () => {
                     name="courierEmail"
                     value={formData.courierEmail}
                     onChange={handleChange}
-                    placeholder="martin@trackflow.com"
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="martin.marin@trackflow.com"
                   />
                 </div>
                 <div>
@@ -460,6 +1084,80 @@ const UpdateShipment = () => {
                     ))}
                   </select>
                 </div>
+              </div>
+            </div>
+
+            {/* 💳 Payment Methods */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-orange-500">💳</span> Payment Methods
+              </h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Payment Method *
+                </label>
+                <select
+                  value={formData.paymentMethod}
+                  onChange={handlePaymentMethodChange}
+                  className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-orange-50/50 font-medium"
+                >
+                  {paymentMethods.map(method => (
+                    <option key={method.value} value={method.value}>
+                      {method.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {renderPaymentFields()}
+            </div>
+
+            {/* 📋 Additional Info */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-orange-500">📋</span> Additional Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Reference Number
+                  </label>
+                  <input
+                    type="text"
+                    name="referenceNumber"
+                    value={formData.referenceNumber}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="e.g., PO-2024-1234"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cost Center
+                  </label>
+                  <input
+                    type="text"
+                    name="costCenter"
+                    value={formData.costCenter}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                    placeholder="e.g., CC-05-2024"
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Internal Notes (Admin only)
+                </label>
+                <textarea
+                  name="internalNotes"
+                  value={formData.internalNotes}
+                  onChange={handleChange}
+                  rows="2"
+                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+                  placeholder="Private notes for internal use..."
+                />
               </div>
             </div>
 
@@ -488,6 +1186,10 @@ const UpdateShipment = () => {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="font-semibold text-gray-900 mb-4">Current Info</h3>
             <div className="space-y-3 text-sm">
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <span className="text-gray-500">Tracking Code</span>
+                <span className="font-mono font-bold text-orange-600">{shipment.trackingCode}</span>
+              </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-500">Status</span>
                 <span className="font-medium capitalize">{shipment.status || 'N/A'}</span>

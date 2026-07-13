@@ -287,35 +287,45 @@ export const jsonbinService = {
   // GESTION DU STATUT
   // ============================================
 
-  updateStatus: async (id, newStatus, location, description) => {
-    try {
-      const shipments = await jsonbinService.getAll()
-      const index = shipments.findIndex(s => s.id === id)
-      if (index === -1) throw new Error('Shipment not found')
+  // src/services/jsonbinService.js
 
-      const statusEntry = {
-        status: newStatus,
-        date: new Date().toISOString(),
-        location: location || shipments[index].currentLocation || 'Unknown',
-        latitude: shipments[index].currentLatitude || null,
-        longitude: shipments[index].currentLongitude || null,
-        description: description || `Status changed to ${newStatus}`,
-      }
+// ============================================
+// GESTION DU STATUT (AVEC statusDetails)
+// ============================================
 
-      shipments[index].status = newStatus
-      shipments[index].statusHistory = [
-        statusEntry,
-        ...(shipments[index].statusHistory || [])
-      ]
-      shipments[index].updatedAt = new Date().toISOString()
+updateStatus: async (id, newStatus, location, description, statusDetails) => {
+  try {
+    const shipments = await jsonbinService.getAll()
+    const index = shipments.findIndex(s => s.id === id)
+    if (index === -1) throw new Error('Shipment not found')
 
-      await jsonbinService.saveAll(shipments)
-      return shipments[index]
-    } catch (error) {
-      console.error('Error updating status:', error)
-      throw error
+    // ✅ Construction de l'entrée d'historique avec statusDetails
+    const statusEntry = {
+      status: newStatus,
+      date: new Date().toISOString(),
+      location: location || shipments[index].currentLocation || 'Unknown',
+      latitude: shipments[index].currentLatitude || null,
+      longitude: shipments[index].currentLongitude || null,
+      description: description || `Status changed to ${newStatus}`,
+      statusDetails: statusDetails || '', // ✅ Stockage des détails
     }
-  },
+
+    // ✅ Mise à jour du colis
+    shipments[index].status = newStatus
+    shipments[index].statusDescription = statusDetails || '' // ✅ Pour affichage direct
+    shipments[index].statusHistory = [
+      statusEntry,
+      ...(shipments[index].statusHistory || [])
+    ]
+    shipments[index].updatedAt = new Date().toISOString()
+
+    await jsonbinService.saveAll(shipments)
+    return shipments[index]
+  } catch (error) {
+    console.error('Error updating status:', error)
+    throw error
+  }
+},
 
   // ============================================
   // AJOUT D'UN ÉVÉNEMENT
