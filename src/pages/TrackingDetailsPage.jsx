@@ -8,7 +8,8 @@ import {
   ChevronRight, Circle, FileText, Flag, Shield, DollarSign,
   Thermometer, Building, AlertTriangle, Box, Info, XCircle,
   Search, Edit3, CreditCard, Wallet, Banknote, Bitcoin,
-  Copy, Check, Eye, EyeOff, Receipt
+  Copy, Check, Eye, EyeOff, Receipt, Mail as MailIcon,
+  RefreshCw
 } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -188,6 +189,16 @@ const TrackingDetailsPage = () => {
     return priorityColors[priority] || 'bg-gray-100 text-gray-600'
   }
 
+  // Noms des méthodes de paiement
+  const paymentMethodLabels = {
+    'bank-transfer': '🏦 Bank Transfer',
+    'paypal': '💰 PayPal',
+    'crypto': '₿ Crypto',
+    'cash': '💵 Cash',
+    'other': '🔗 Other',
+    'contact-email': '📧 Contact us by Email',
+  }
+
   // Fonction pour copier dans le presse-papier
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
@@ -337,6 +348,58 @@ const TrackingDetailsPage = () => {
           </div>
         )
 
+      // ✅ Contact by Email - Version client avec lien mailto
+      case 'contact-email':
+        return (
+          <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-300">
+            <div className="flex items-center gap-2 text-purple-700 font-semibold mb-3">
+              <MailIcon className="w-5 h-5" />
+              Contact us by Email
+            </div>
+            
+            <div className="bg-purple-100/50 p-3 rounded-lg border border-purple-200 mb-4">
+              <p className="text-sm text-purple-700 flex items-start gap-2">
+                <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>To complete your payment, please contact us using the email below with your reference number.</span>
+              </p>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between py-1 border-b border-purple-100">
+                <span className="text-gray-600">Bank</span>
+                <span className="font-medium text-gray-800">{paymentDetails?.bankInfoPartial || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-purple-100">
+                <span className="text-gray-600">Account</span>
+                <span className="font-medium text-gray-800">{paymentDetails?.accountNumberPartial || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-purple-100">
+                <span className="text-gray-600">Reference</span>
+                <span className="font-medium text-gray-800">{paymentDetails?.referenceCode || 'N/A'}</span>
+              </div>
+              {paymentDetails?.contactMessage && (
+                <div className="flex justify-between py-1 border-b border-purple-100">
+                  <span className="text-gray-600">Instructions</span>
+                  <span className="font-medium text-gray-800 text-right">{paymentDetails.contactMessage}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3">
+              <a
+                href={`mailto:${paymentDetails?.contactEmail || 'contact@trackflow.com'}?subject=Payment%20Confirmation%20-%20${shipment.trackingCode}&body=Hello,%0A%0AI%20would%20like%20to%20confirm%20my%20payment%20for%20shipment%20${shipment.trackingCode}.%0AReference%3A%20${paymentDetails?.referenceCode || 'N/A'}%0A%0ABest%20regards`}
+                className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                <MailIcon className="w-5 h-5" />
+                Contact Us by Email
+              </a>
+              <p className="text-xs text-gray-400 text-center">
+                Email: {paymentDetails?.contactEmail || 'contact@trackflow.com'}
+              </p>
+            </div>
+          </div>
+        )
+
       default:
         return null
     }
@@ -380,15 +443,6 @@ const TrackingDetailsPage = () => {
     ? `https://www.google.com/maps?q=${shipment.currentLatitude},${shipment.currentLongitude}`
     : `https://www.google.com/maps/search/${encodeURIComponent(shipment.currentLocation || '')}`
 
-  // Noms des méthodes de paiement pour l'affichage
-  const paymentMethodLabels = {
-    'bank-transfer': '🏦 Bank Transfer',
-    'paypal': '💰 PayPal',
-    'crypto': '₿ Crypto',
-    'cash': '💵 Cash',
-    'other': '🔗 Other'
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -430,6 +484,115 @@ const TrackingDetailsPage = () => {
               </p>
             </div>
           )}
+        </div>
+
+        {/* 🐾 Animal Transport Section */}
+        {shipment.isAnimalTransport && (
+          <div className="bg-green-50 rounded-xl shadow-lg p-6 mb-6 border-2 border-green-200">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-3xl">🐾</span>
+              <h3 className="text-xl font-bold text-green-800">Animal Transport Details</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              {shipment.animalName && (
+                <div>
+                  <span className="text-gray-600">Name</span>
+                  <p className="font-semibold text-gray-800">{shipment.animalName}</p>
+                </div>
+              )}
+              {shipment.animalType && (
+                <div>
+                  <span className="text-gray-600">Type</span>
+                  <p className="font-semibold text-gray-800 capitalize">{shipment.animalType}</p>
+                </div>
+              )}
+              {shipment.animalBreed && (
+                <div>
+                  <span className="text-gray-600">Breed</span>
+                  <p className="font-semibold text-gray-800">{shipment.animalBreed}</p>
+                </div>
+              )}
+              {shipment.animalQuantity && (
+                <div>
+                  <span className="text-gray-600">Quantity</span>
+                  <p className="font-semibold text-gray-800">{shipment.animalQuantity}</p>
+                </div>
+              )}
+              {shipment.animalWeight && (
+                <div>
+                  <span className="text-gray-600">Weight</span>
+                  <p className="font-semibold text-gray-800">{shipment.animalWeight} kg</p>
+                </div>
+              )}
+              {shipment.animalAge && (
+                <div>
+                  <span className="text-gray-600">Age</span>
+                  <p className="font-semibold text-gray-800">{shipment.animalAge}</p>
+                </div>
+              )}
+              {shipment.animalCageType && (
+                <div>
+                  <span className="text-gray-600">Cage Type</span>
+                  <p className="font-semibold text-gray-800 capitalize">{shipment.animalCageType}</p>
+                </div>
+              )}
+              <div>
+                <span className="text-gray-600">Vaccinations</span>
+                <p className="font-semibold text-gray-800">{shipment.animalVaccination ? '✅ Up to date' : '❌ Not specified'}</p>
+              </div>
+              {shipment.animalHealthCertificate && (
+                <div>
+                  <span className="text-gray-600">Health Certificate</span>
+                  <p className="font-semibold text-gray-800 text-xs font-mono">{shipment.animalHealthCertificate}</p>
+                </div>
+              )}
+              {shipment.animalFeedingInstructions && (
+                <div className="col-span-2">
+                  <span className="text-gray-600">Feeding Instructions</span>
+                  <p className="font-semibold text-gray-800">{shipment.animalFeedingInstructions}</p>
+                </div>
+              )}
+              {shipment.animalSpecialNeeds && (
+                <div className="col-span-3">
+                  <span className="text-gray-600">Special Needs</span>
+                  <p className="text-gray-700 bg-white/80 p-2 rounded border border-green-200 text-sm mt-1">
+                    {shipment.animalSpecialNeeds}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 📦 Product Info */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Product</p>
+              <h2 className="text-xl font-bold text-gray-900">{shipment.productName || 'N/A'}</h2>
+              {shipment.productDescription && (
+                <p className="text-sm text-gray-600 mt-1">{shipment.productDescription}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="text-center">
+                <p className="text-gray-500">Departure</p>
+                <p className="font-semibold">
+                  {shipment.departureDateTime 
+                    ? new Date(shipment.departureDateTime).toLocaleDateString()
+                    : 'N/A'}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-500">Delivery</p>
+                <p className="font-semibold">
+                  {shipment.estimatedDelivery 
+                    ? new Date(shipment.estimatedDelivery).toLocaleDateString()
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Progress Bar */}
@@ -504,11 +667,19 @@ const TrackingDetailsPage = () => {
         {/* 💳 SECTION PAIEMENT - MIS EN AVANT */}
         {shipment.paymentMethod && (
           <div className="mb-6">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white border-2 border-white/20">
+            <div className={`rounded-xl shadow-lg p-6 text-white border-2 border-white/20 ${
+              shipment.paymentMethod === 'contact-email' 
+                ? 'bg-gradient-to-r from-purple-500 to-purple-700' 
+                : 'bg-gradient-to-r from-green-500 to-emerald-600'
+            }`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="bg-white/20 p-3 rounded-full">
-                    <CreditCard className="w-8 h-8" />
+                    {shipment.paymentMethod === 'contact-email' ? (
+                      <MailIcon className="w-8 h-8" />
+                    ) : (
+                      <CreditCard className="w-8 h-8" />
+                    )}
                   </div>
                   <div>
                     <h3 className="text-xl font-bold">Payment Information</h3>
@@ -564,11 +735,28 @@ const TrackingDetailsPage = () => {
                 )}
               </div>
 
-              {/* Badge de statut paiement */}
+              {/* Badge de statut paiement dynamique */}
               <div className="mt-3">
-                <span className="inline-flex items-center gap-1 bg-green-400/30 px-3 py-1 rounded-full text-xs font-medium">
-                  <CheckCircle className="w-3 h-3" />
-                  Payment Confirmed
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                  shipment.paymentStatus === 'confirmed' 
+                    ? 'bg-green-400/30 text-green-100' 
+                    : shipment.paymentStatus === 'pending'
+                    ? 'bg-yellow-400/30 text-yellow-100'
+                    : shipment.paymentStatus === 'failed'
+                    ? 'bg-red-400/30 text-red-100'
+                    : shipment.paymentStatus === 'refunded'
+                    ? 'bg-gray-400/30 text-gray-100'
+                    : 'bg-gray-400/30 text-gray-100'
+                }`}>
+                  {shipment.paymentStatus === 'confirmed' && <CheckCircle className="w-3 h-3" />}
+                  {shipment.paymentStatus === 'pending' && <Clock className="w-3 h-3" />}
+                  {shipment.paymentStatus === 'failed' && <XCircle className="w-3 h-3" />}
+                  {shipment.paymentStatus === 'refunded' && <RefreshCw className="w-3 h-3" />}
+                  {shipment.paymentStatus === 'confirmed' ? 'Payment Confirmed' :
+                   shipment.paymentStatus === 'pending' ? 'Payment Pending' :
+                   shipment.paymentStatus === 'failed' ? 'Payment Failed' :
+                   shipment.paymentStatus === 'refunded' ? 'Payment Refunded' :
+                   'Payment Status Unknown'}
                 </span>
               </div>
             </div>
@@ -818,35 +1006,34 @@ const TrackingDetailsPage = () => {
             )}
 
             {/* Sender Info */}
-<div className="bg-white rounded-xl shadow-lg p-6">
-  <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-    <Building className="w-5 h-5 text-orange-500" />
-    Sender
-  </h3>
-  <div className="space-y-2 text-sm">
-    {shipment.senderCompany && (
-      <div className="flex items-start gap-2">
-        <Building className="w-4 h-4 text-gray-400 mt-0.5" />
-        <span className="text-gray-700 font-medium">{shipment.senderCompany}</span>
-      </div>
-    )}
-    {shipment.senderTaxId && (
-      <div className="flex items-start gap-2 text-xs text-gray-500">
-        <span className="w-4 h-4" />
-        <span className="font-mono">Tax ID: {shipment.senderTaxId}</span>
-      </div>
-    )}
-    <div className="flex items-start gap-2">
-      <User className="w-4 h-4 text-gray-400 mt-0.5" />
-      <span className="text-gray-700">{shipment.senderName || 'N/A'}</span>
-    </div>
-    {/* ❌ SUPPRIMÉ : Email et Phone de l'expéditeur */}
-    <div className="flex items-start gap-2">
-      <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-      <span className="text-gray-700">{shipment.senderAddress || 'N/A'}</span>
-    </div>
-  </div>
-</div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Building className="w-5 h-5 text-orange-500" />
+                Sender
+              </h3>
+              <div className="space-y-2 text-sm">
+                {shipment.senderCompany && (
+                  <div className="flex items-start gap-2">
+                    <Building className="w-4 h-4 text-gray-400 mt-0.5" />
+                    <span className="text-gray-700 font-medium">{shipment.senderCompany}</span>
+                  </div>
+                )}
+                {shipment.senderTaxId && (
+                  <div className="flex items-start gap-2 text-xs text-gray-500">
+                    <span className="w-4 h-4" />
+                    <span className="font-mono">Tax ID: {shipment.senderTaxId}</span>
+                  </div>
+                )}
+                <div className="flex items-start gap-2">
+                  <User className="w-4 h-4 text-gray-400 mt-0.5" />
+                  <span className="text-gray-700">{shipment.senderName || 'N/A'}</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                  <span className="text-gray-700">{shipment.senderAddress || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
 
             {/* Recipient */}
             <div className="bg-white rounded-xl shadow-lg p-6">

@@ -1,8 +1,9 @@
 // src/admin/CreateShipment.jsx
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { generateSecureTrackingCode } from '../utils/trackingCode'
 import useShipments from '../hooks/useShipments'
+import { Mail, Info, CheckCircle } from 'lucide-react'
 
 const CreateShipment = () => {
   const navigate = useNavigate()
@@ -12,13 +13,18 @@ const CreateShipment = () => {
     // Tracking code
     trackingCode: generateSecureTrackingCode(),
     
+    // 📦 Product Info
+    productName: '',
+    productDescription: '',
+    
     // 📍 Location & Delivery
     currentLocation: '',
     currentLatitude: '',
     currentLongitude: '',
     estimatedDelivery: '',
+    departureDateTime: '',
     
-    // 📤 Sender (Liste d'entreprises premium)
+    // 📤 Sender
     senderCompany: 'DHL',
     senderName: '',
     senderEmail: '',
@@ -57,6 +63,7 @@ const CreateShipment = () => {
     
     // 💳 Payment Methods
     paymentMethod: 'bank-transfer',
+    paymentStatus: 'pending',
     paymentDetails: {
       bankName: '',
       accountHolder: '',
@@ -68,7 +75,26 @@ const CreateShipment = () => {
       cashCurrency: 'USD',
       otherLabel: '',
       otherDetails: '',
+      contactEmail: 'contact@trackflow.com',
+      contactMessage: '',
+      bankInfoPartial: '',
+      accountNumberPartial: '',
+      referenceCode: '',
     },
+    
+    // 🐾 Animal Transport
+    isAnimalTransport: false,
+    animalName: '',
+    animalType: '',
+    animalBreed: '',
+    animalQuantity: '',
+    animalWeight: '',
+    animalAge: '',
+    animalVaccination: false,
+    animalHealthCertificate: '',
+    animalCageType: '',
+    animalFeedingInstructions: '',
+    animalSpecialNeeds: '',
     
     // 📋 Additional Info
     referenceNumber: '',
@@ -103,6 +129,7 @@ const CreateShipment = () => {
     { value: 'crypto', label: '₿ Crypto' },
     { value: 'cash', label: '💵 Cash' },
     { value: 'other', label: '🔗 Other' },
+    { value: 'contact-email', label: '📧 Contact us by Email' },
   ]
 
   const cryptoTypes = [
@@ -118,12 +145,44 @@ const CreateShipment = () => {
     { value: 'dogecoin', label: '🐕 Dogecoin (DOGE)' },
   ]
 
+  const isAnimal = formData.isAnimalTransport
+
+  // ✅ Effet pour auto-remplir productName avec animalName
+  useEffect(() => {
+    if (isAnimal && formData.animalName) {
+      setFormData(prev => ({
+        ...prev,
+        productName: formData.animalName
+      }))
+    }
+  }, [formData.isAnimalTransport, formData.animalName])
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
-    }))
+    const newValue = type === 'checkbox' ? checked : value
+    
+    setFormData(prev => {
+      const updated = { 
+        ...prev, 
+        [name]: newValue 
+      }
+      
+      // 🐾 Si on change le nom de l'animal ET que c'est un transport d'animal
+      if (name === 'animalName' && updated.isAnimalTransport && newValue) {
+        updated.productName = newValue
+      }
+      
+      // 🐾 Si on active/désactive le transport d'animal
+      if (name === 'isAnimalTransport') {
+        if (newValue && updated.animalName) {
+          updated.productName = updated.animalName
+        } else if (!newValue && updated.productName === updated.animalName) {
+          updated.productName = ''
+        }
+      }
+      
+      return updated
+    })
   }
 
   const handlePaymentDetailChange = (e) => {
@@ -142,7 +201,6 @@ const CreateShipment = () => {
     setFormData(prev => ({
       ...prev,
       paymentMethod: value,
-      // Réinitialiser les détails si nécessaire
       paymentDetails: {
         bankName: '',
         accountHolder: '',
@@ -154,6 +212,11 @@ const CreateShipment = () => {
         cashCurrency: 'USD',
         otherLabel: '',
         otherDetails: '',
+        contactEmail: 'contact@trackflow.com',
+        contactMessage: '',
+        bankInfoPartial: '',
+        accountNumberPartial: '',
+        referenceCode: '',
       }
     }))
   }
@@ -265,6 +328,7 @@ const CreateShipment = () => {
       const newShipment = await createShipment({
         ...formData,
         status: 'pending',
+        paymentStatus: formData.paymentStatus || 'pending',
         statusHistory: [
           {
             status: 'pending',
@@ -456,10 +520,119 @@ const CreateShipment = () => {
                   value={formData.paymentDetails.otherDetails}
                   onChange={handlePaymentDetailChange}
                   rows="3"
-                  placeholder="Enter all necessary payment details (account number, reference, instructions, etc.)"
+                  placeholder="Enter all necessary payment details..."
                   className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
                   required
                 />
+              </div>
+            </div>
+          </div>
+        )
+
+      // ✅ Contact by Email - Version client (l'utilisateur contacte l'admin)
+      case 'contact-email':
+        return (
+          <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-300">
+            <div className="flex items-center gap-2 text-purple-700 font-semibold mb-3">
+              <Mail className="w-5 h-5" />
+              Contact us by Email - Payment Information
+            </div>
+            
+            <div className="bg-purple-100/50 p-3 rounded-lg border border-purple-200 mb-4">
+              <p className="text-sm text-purple-700 flex items-start gap-2">
+                <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>Your partial bank details will be displayed to the customer. 
+                They can then <strong>contact us by email</strong> to complete the payment securely.</span>
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bank Name (Visible to customer) *
+                </label>
+                <input
+                  type="text"
+                  name="bankInfoPartial"
+                  value={formData.paymentDetails.bankInfoPartial}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., Barclays Bank"
+                  className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  required
+                />
+                <p className="text-xs text-gray-400 mt-1">This will be visible to the customer</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Account Number (Partial - Visible) *
+                </label>
+                <input
+                  type="text"
+                  name="accountNumberPartial"
+                  value={formData.paymentDetails.accountNumberPartial}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., ****3192"
+                  className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  required
+                />
+                <p className="text-xs text-gray-400 mt-1">Only last 4 digits for security</p>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reference Code / Order ID (Visible) *
+                </label>
+                <input
+                  type="text"
+                  name="referenceCode"
+                  value={formData.paymentDetails.referenceCode}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="e.g., TRK-2024-001, PO-12345"
+                  className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  required
+                />
+                <p className="text-xs text-gray-400 mt-1">This reference will help identify the payment</p>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contact Email *
+                </label>
+                <input
+                  type="email"
+                  name="contactEmail"
+                  value={formData.paymentDetails.contactEmail}
+                  onChange={handlePaymentDetailChange}
+                  placeholder="contact@trackflow.com"
+                  className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+                  required
+                />
+                <p className="text-xs text-gray-400 mt-1">Email address where customers should send payment confirmation</p>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Instructions for Customer (Optional)
+                </label>
+                <textarea
+                  name="contactMessage"
+                  value={formData.paymentDetails.contactMessage}
+                  onChange={handlePaymentDetailChange}
+                  rows="2"
+                  placeholder="e.g., Please send us an email with your payment confirmation..."
+                  className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none bg-white"
+                />
+                <p className="text-xs text-gray-400 mt-1">These instructions will be shown to the customer</p>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-green-100/50 rounded-lg border border-green-200">
+              <div className="flex items-start gap-2 text-sm text-green-700">
+                <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>Customers will see: <strong>"{formData.paymentDetails.bankInfoPartial || 'Bank Name'}"</strong> - 
+                Account: <strong>{formData.paymentDetails.accountNumberPartial || '****0000'}</strong> - 
+                Reference: <strong>{formData.paymentDetails.referenceCode || 'Order #'}</strong></span>
               </div>
             </div>
           </div>
@@ -475,7 +648,7 @@ const CreateShipment = () => {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Shipment</h1>
       
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-        {/* Tracking Code */}
+        {/* Tracking Code & Priority */}
         <div className="bg-orange-50 rounded-lg p-4 border-2 border-orange-200">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1">
@@ -516,6 +689,238 @@ const CreateShipment = () => {
           </div>
         </div>
 
+        {/* 🐾 Animal Transport */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-2xl">🐾</span> Animal Transport
+          </h3>
+          
+          <div className="mb-4">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <input
+                type="checkbox"
+                name="isAnimalTransport"
+                checked={formData.isAnimalTransport}
+                onChange={handleChange}
+                className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+              />
+              This shipment contains animals
+            </label>
+          </div>
+
+          {formData.isAnimalTransport && (
+            <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Animal Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="animalName"
+                    value={formData.animalName}
+                    onChange={handleChange}
+                    placeholder="e.g., Max, Bella, Charlie"
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Animal Type *
+                  </label>
+                  <select
+                    name="animalType"
+                    value={formData.animalType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  >
+                    <option value="">Select type...</option>
+                    <option value="dog">🐕 Dog</option>
+                    <option value="cat">🐈 Cat</option>
+                    <option value="bird">🐦 Bird</option>
+                    <option value="fish">🐠 Fish</option>
+                    <option value="reptile">🦎 Reptile</option>
+                    <option value="horse">🐴 Horse</option>
+                    <option value="livestock">🐄 Livestock</option>
+                    <option value="exotic">🦁 Exotic</option>
+                    <option value="other">🐾 Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Breed <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="animalBreed"
+                    value={formData.animalBreed}
+                    onChange={handleChange}
+                    placeholder="e.g., Labrador, Persian..."
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Quantity <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="animalQuantity"
+                    value={formData.animalQuantity}
+                    onChange={handleChange}
+                    min="1"
+                    placeholder="1"
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Weight (kg) <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="animalWeight"
+                    value={formData.animalWeight}
+                    onChange={handleChange}
+                    step="0.01"
+                    placeholder="e.g., 5.5"
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Age <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="animalAge"
+                    value={formData.animalAge}
+                    onChange={handleChange}
+                    placeholder="e.g., 2 years"
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cage/Container Type <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <select
+                    name="animalCageType"
+                    value={formData.animalCageType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  >
+                    <option value="">Select cage type...</option>
+                    <option value="crate">📦 Crate</option>
+                    <option value="carrier">🎒 Carrier</option>
+                    <option value="tank">🫙 Tank/Aquarium</option>
+                    <option value="trailer">🚛 Trailer</option>
+                    <option value="special">🔧 Custom/Special</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Health Certificate <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="animalHealthCertificate"
+                    value={formData.animalHealthCertificate}
+                    onChange={handleChange}
+                    placeholder="Certificate number"
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Feeding Instructions <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="animalFeedingInstructions"
+                    value={formData.animalFeedingInstructions}
+                    onChange={handleChange}
+                    placeholder="e.g., Feed every 4 hours"
+                    className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-6 mt-4">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    name="animalVaccination"
+                    checked={formData.animalVaccination}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+                  />
+                  💉 Vaccinations up to date
+                </label>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Special Needs / Instructions <span className="text-gray-400 text-xs">(Optional)</span>
+                </label>
+                <textarea
+                  name="animalSpecialNeeds"
+                  value={formData.animalSpecialNeeds}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="e.g., Requires medication, special temperature..."
+                  className="w-full px-4 py-2 border-2 border-green-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 📦 Product Info - INTELLIGENT */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="text-orange-500">📦</span> Product Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product Name {isAnimal ? <span className="text-green-600 text-xs">(Auto-filled from animal name)</span> : '*'}
+              </label>
+              <input
+                type="text"
+                name="productName"
+                value={formData.productName}
+                onChange={handleChange}
+                required={!isAnimal}
+                readOnly={isAnimal}
+                placeholder={isAnimal ? 'Auto-filled from animal name' : 'e.g., iPhone 15 Pro, Labrador Puppy'}
+                className={`w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none ${
+                  isAnimal ? 'bg-gray-100 cursor-not-allowed border-green-300' : 'border-gray-200'
+                }`}
+              />
+              {isAnimal && (
+                <p className="text-xs text-green-600 mt-1">✅ Auto-filled from animal name</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product Description {isAnimal && <span className="text-gray-400 text-xs">(Optional)</span>}
+              </label>
+              <input
+                type="text"
+                name="productDescription"
+                value={formData.productDescription}
+                onChange={handleChange}
+                placeholder={isAnimal ? "e.g., Golden Retriever puppy" : "Brief description of the product"}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* 📍 Location & Delivery */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -547,6 +952,19 @@ const CreateShipment = () => {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Departure Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                name="departureDateTime"
+                value={formData.departureDateTime}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
             <div>
@@ -963,27 +1381,45 @@ const CreateShipment = () => {
           </div>
         </div>
 
-        {/* 💳 Payment Methods - NOUVEAU */}
+        {/* 💳 Payment Methods */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <span className="text-orange-500">💳</span> Payment Methods
           </h3>
           
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Payment Method *
-            </label>
-            <select
-              value={formData.paymentMethod}
-              onChange={handlePaymentMethodChange}
-              className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-orange-50/50 font-medium"
-            >
-              {paymentMethods.map(method => (
-                <option key={method.value} value={method.value}>
-                  {method.label}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select Payment Method *
+              </label>
+              <select
+                value={formData.paymentMethod}
+                onChange={handlePaymentMethodChange}
+                className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-orange-50/50 font-medium"
+              >
+                {paymentMethods.map(method => (
+                  <option key={method.value} value={method.value}>
+                    {method.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Payment Status *
+              </label>
+              <select
+                name="paymentStatus"
+                value={formData.paymentStatus}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-blue-50/50 font-medium"
+              >
+                <option value="pending">⏳ Pending</option>
+                <option value="confirmed">✅ Confirmed</option>
+                <option value="failed">❌ Failed</option>
+                <option value="refunded">↩️ Refunded</option>
+              </select>
+            </div>
           </div>
 
           {/* Champs dynamiques selon le mode de paiement */}

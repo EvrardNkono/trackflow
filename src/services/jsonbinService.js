@@ -70,26 +70,98 @@ export const jsonbinService = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         status: 'pending',
+        
+        // 📦 Product Info
+        productName: shipmentData.productName || '',
+        productDescription: shipmentData.productDescription || '',
+        
+        // 📍 Location & Delivery
         currentLocation: shipmentData.currentLocation || '',
         currentLatitude: shipmentData.currentLatitude || null,
         currentLongitude: shipmentData.currentLongitude || null,
         estimatedDelivery: shipmentData.estimatedDelivery || null,
+        departureDateTime: shipmentData.departureDateTime || '',
+        
+        // 📤 Sender
+        senderCompany: shipmentData.senderCompany || '',
+        senderName: shipmentData.senderName || '',
+        senderEmail: shipmentData.senderEmail || '',
+        senderPhone: shipmentData.senderPhone || '',
+        senderAddress: shipmentData.senderAddress || '',
+        senderTaxId: shipmentData.senderTaxId || '',
+        
+        // 📬 Recipient
+        recipientName: shipmentData.recipientName || '',
+        recipientEmail: shipmentData.recipientEmail || '',
+        recipientPhone: shipmentData.recipientPhone || '',
+        recipientAddress: shipmentData.recipientAddress || '',
+        recipientCity: shipmentData.recipientCity || '',
+        recipientPostalCode: shipmentData.recipientPostalCode || '',
+        recipientCountry: shipmentData.recipientCountry || 'United States',
+        
+        // 📦 Package Details
+        weight: shipmentData.weight || '',
+        dimensions: shipmentData.dimensions || '',
+        packageType: shipmentData.packageType || 'standard',
+        deliveryType: shipmentData.deliveryType || 'standard',
+        deliveryDate: shipmentData.deliveryDate || '',
+        declaredValue: shipmentData.declaredValue || '0',
+        insuranceType: shipmentData.insuranceType || 'none',
+        handlingInstructions: shipmentData.handlingInstructions || '',
+        specialInstructions: shipmentData.specialInstructions || '',
+        temperature: shipmentData.temperature || '',
+        isHazardous: shipmentData.isHazardous || false,
+        isFragile: shipmentData.isFragile || false,
+        isPerishable: shipmentData.isPerishable || false,
+        
+        // 🚚 Courier
         courierName: shipmentData.courierName || '',
         courierEmail: shipmentData.courierEmail || '',
         vehicleType: shipmentData.vehicleType || '',
+        
+        // 💳 Payment Methods
+        paymentMethod: shipmentData.paymentMethod || 'bank-transfer',
+        paymentStatus: shipmentData.paymentStatus || 'pending',
+        paymentDetails: {
+          bankName: shipmentData.paymentDetails?.bankName || '',
+          accountHolder: shipmentData.paymentDetails?.accountHolder || '',
+          iban: shipmentData.paymentDetails?.iban || '',
+          bic: shipmentData.paymentDetails?.bic || '',
+          paypalEmail: shipmentData.paymentDetails?.paypalEmail || '',
+          cryptoWallet: shipmentData.paymentDetails?.cryptoWallet || '',
+          cryptoType: shipmentData.paymentDetails?.cryptoType || 'bitcoin',
+          cashCurrency: shipmentData.paymentDetails?.cashCurrency || 'USD',
+          otherLabel: shipmentData.paymentDetails?.otherLabel || '',
+          otherDetails: shipmentData.paymentDetails?.otherDetails || '',
+          // ✅ NEW: Contact by Email fields
+          contactEmail: shipmentData.paymentDetails?.contactEmail || 'contact@trackflow.com',
+          contactMessage: shipmentData.paymentDetails?.contactMessage || '',
+          bankInfoPartial: shipmentData.paymentDetails?.bankInfoPartial || '',
+          accountNumberPartial: shipmentData.paymentDetails?.accountNumberPartial || '',
+          referenceCode: shipmentData.paymentDetails?.referenceCode || '',
+        },
+        
+        // 🐾 Animal Transport
+        isAnimalTransport: shipmentData.isAnimalTransport || false,
+        animalName: shipmentData.animalName || '',
+        animalType: shipmentData.animalType || '',
+        animalBreed: shipmentData.animalBreed || '',
+        animalQuantity: shipmentData.animalQuantity || '',
+        animalWeight: shipmentData.animalWeight || '',
+        animalAge: shipmentData.animalAge || '',
+        animalVaccination: shipmentData.animalVaccination || false,
+        animalHealthCertificate: shipmentData.animalHealthCertificate || '',
+        animalCageType: shipmentData.animalCageType || '',
+        animalFeedingInstructions: shipmentData.animalFeedingInstructions || '',
+        animalSpecialNeeds: shipmentData.animalSpecialNeeds || '',
+        
+        // 📋 Additional Info
         priority: shipmentData.priority || 'normal',
-        insuranceType: shipmentData.insuranceType || 'none',
-        declaredValue: shipmentData.declaredValue || '0',
-        temperature: shipmentData.temperature || '',
-        specialInstructions: shipmentData.specialInstructions || '',
-        isFragile: shipmentData.isFragile || false,
-        isHazardous: shipmentData.isHazardous || false,
-        isPerishable: shipmentData.isPerishable || false,
-        senderCompany: shipmentData.senderCompany || '',
-        senderTaxId: shipmentData.senderTaxId || '',
         referenceNumber: shipmentData.referenceNumber || '',
         costCenter: shipmentData.costCenter || '',
         internalNotes: shipmentData.internalNotes || '',
+        
+        // 📊 Status History
         statusHistory: [
           {
             status: 'pending',
@@ -193,7 +265,7 @@ export const jsonbinService = {
   },
 
   // ============================================
-  // GESTION DU LIVREUR (avec email et véhicule)
+  // GESTION DU LIVREUR
   // ============================================
 
   updateCourier: async (id, courierName, courierEmail, vehicleType) => {
@@ -216,7 +288,7 @@ export const jsonbinService = {
   },
 
   // ============================================
-  // 🆕 GESTION DE LA PRIORITÉ
+  // GESTION DE LA PRIORITÉ
   // ============================================
 
   updatePriority: async (id, priority) => {
@@ -237,7 +309,7 @@ export const jsonbinService = {
   },
 
   // ============================================
-  // 🆕 GESTION DE L'ASSURANCE
+  // GESTION DE L'ASSURANCE
   // ============================================
 
   updateInsurance: async (id, insuranceType, declaredValue) => {
@@ -259,7 +331,7 @@ export const jsonbinService = {
   },
 
   // ============================================
-  // 🆕 GESTION DES FLAGS SPÉCIAUX
+  // GESTION DES FLAGS SPÉCIAUX
   // ============================================
 
   updateSpecialFlags: async (id, flags) => {
@@ -284,48 +356,40 @@ export const jsonbinService = {
   },
 
   // ============================================
-  // GESTION DU STATUT
+  // GESTION DU STATUT (AVEC statusDetails)
   // ============================================
 
-  // src/services/jsonbinService.js
+  updateStatus: async (id, newStatus, location, description, statusDetails) => {
+    try {
+      const shipments = await jsonbinService.getAll()
+      const index = shipments.findIndex(s => s.id === id)
+      if (index === -1) throw new Error('Shipment not found')
 
-// ============================================
-// GESTION DU STATUT (AVEC statusDetails)
-// ============================================
+      const statusEntry = {
+        status: newStatus,
+        date: new Date().toISOString(),
+        location: location || shipments[index].currentLocation || 'Unknown',
+        latitude: shipments[index].currentLatitude || null,
+        longitude: shipments[index].currentLongitude || null,
+        description: description || `Status changed to ${newStatus}`,
+        statusDetails: statusDetails || '',
+      }
 
-updateStatus: async (id, newStatus, location, description, statusDetails) => {
-  try {
-    const shipments = await jsonbinService.getAll()
-    const index = shipments.findIndex(s => s.id === id)
-    if (index === -1) throw new Error('Shipment not found')
+      shipments[index].status = newStatus
+      shipments[index].statusDescription = statusDetails || ''
+      shipments[index].statusHistory = [
+        statusEntry,
+        ...(shipments[index].statusHistory || [])
+      ]
+      shipments[index].updatedAt = new Date().toISOString()
 
-    // ✅ Construction de l'entrée d'historique avec statusDetails
-    const statusEntry = {
-      status: newStatus,
-      date: new Date().toISOString(),
-      location: location || shipments[index].currentLocation || 'Unknown',
-      latitude: shipments[index].currentLatitude || null,
-      longitude: shipments[index].currentLongitude || null,
-      description: description || `Status changed to ${newStatus}`,
-      statusDetails: statusDetails || '', // ✅ Stockage des détails
+      await jsonbinService.saveAll(shipments)
+      return shipments[index]
+    } catch (error) {
+      console.error('Error updating status:', error)
+      throw error
     }
-
-    // ✅ Mise à jour du colis
-    shipments[index].status = newStatus
-    shipments[index].statusDescription = statusDetails || '' // ✅ Pour affichage direct
-    shipments[index].statusHistory = [
-      statusEntry,
-      ...(shipments[index].statusHistory || [])
-    ]
-    shipments[index].updatedAt = new Date().toISOString()
-
-    await jsonbinService.saveAll(shipments)
-    return shipments[index]
-  } catch (error) {
-    console.error('Error updating status:', error)
-    throw error
-  }
-},
+  },
 
   // ============================================
   // AJOUT D'UN ÉVÉNEMENT
@@ -385,11 +449,12 @@ updateStatus: async (id, newStatus, location, description, statusDetails) => {
       const delivered = shipments.filter(s => s.status === 'delivered').length
       const pending = shipments.filter(s => s.status === 'pending').length
       const delayed = shipments.filter(s => s.status === 'delayed').length
+      const cancelled = shipments.filter(s => s.status === 'cancelled').length
 
-      return { total, inTransit, delivered, pending, delayed }
+      return { total, inTransit, delivered, pending, delayed, cancelled }
     } catch (error) {
       console.error('Error getting stats:', error)
-      return { total: 0, inTransit: 0, delivered: 0, pending: 0, delayed: 0 }
+      return { total: 0, inTransit: 0, delivered: 0, pending: 0, delayed: 0, cancelled: 0 }
     }
   },
 
@@ -417,8 +482,11 @@ updateStatus: async (id, newStatus, location, description, statusDetails) => {
       }
 
       let progress = 0
-      if (shipment.status === 'pending') progress = 25
-      else if (shipment.status === 'in-transit') progress = 60
+      if (shipment.status === 'pending' || shipment.status === 'processing') progress = 15
+      else if (shipment.status === 'in-transit') progress = 40
+      else if (shipment.status === 'customs-clearance' || shipment.status === 'held-by-customs') progress = 50
+      else if (shipment.status === 'cleared-customs') progress = 65
+      else if (shipment.status === 'out-for-delivery') progress = 80
       else if (shipment.status === 'delivered') progress = 100
       else if (shipment.status === 'delayed') progress = 40
 
@@ -428,9 +496,12 @@ updateStatus: async (id, newStatus, location, description, statusDetails) => {
         progress,
         statusLabel: {
           pending: 'Pending',
+          processing: 'Processing',
           'in-transit': 'In Transit',
+          'out-for-delivery': 'Out for Delivery',
           delivered: 'Delivered',
           delayed: 'Delayed',
+          cancelled: 'Cancelled',
         }[shipment.status] || shipment.status
       }
     } catch (error) {

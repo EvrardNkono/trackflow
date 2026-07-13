@@ -29,6 +29,7 @@ const TrackingReceipt = ({ shipment, onClose }) => {
     })
   }
 
+  // ✅ Fonction d'impression améliorée - sans about:blank
   const handlePrint = () => {
     const printContent = receiptRef.current
     if (!printContent) return
@@ -36,21 +37,26 @@ const TrackingReceipt = ({ shipment, onClose }) => {
     const originalTitle = document.title
     document.title = `Tracking Receipt - ${shipment.trackingCode}`
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
-    if (!printWindow) {
-      alert('Please allow popups for printing')
-      return
-    }
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'absolute'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = 'none'
+    iframe.style.visibility = 'hidden'
+    document.body.appendChild(iframe)
 
-    printWindow.document.write(`
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+    iframeDoc.open()
+    iframeDoc.write(`
+      <!DOCTYPE html>
       <html>
         <head>
           <title>Tracking Receipt - ${shipment.trackingCode}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
-            .receipt-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; }
+            .receipt-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; position: relative; overflow: hidden; }
             .header { text-align: center; border-bottom: 3px solid #ea580c; padding-bottom: 20px; margin-bottom: 20px; }
-            .header-logo { max-height: 80px; width: auto; margin-bottom: 10px; }
+            .header-logo { max-height: 80px; width: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; object-fit: contain; }
             .header h1 { color: #ea580c; margin: 0; font-size: 24px; }
             .header p { color: #666; margin: 5px 0 0 0; }
             .tracking-code { background: #fff7ed; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 2px solid #ea580c; }
@@ -60,6 +66,8 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
             .row-label { color: #6b7280; font-weight: 500; }
             .row-value { color: #1a202c; font-weight: 600; }
+            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af; }
             .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
             .status-pending { background: #fef3c7; color: #92400e; }
             .status-in-transit { background: #ede9fe; color: #5b21b6; }
@@ -74,39 +82,51 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             .priority-normal { background: #dbeafe; color: #1e40af; }
             .priority-high { background: #fed7aa; color: #9a3412; }
             .priority-urgent { background: #fecaca; color: #991b1b; }
-            .footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af; }
-            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .watermark { color: #f3f4f6; font-size: 120px; position: absolute; right: 20px; bottom: 20px; opacity: 0.1; font-weight: bold; }
-            .flag-icon { margin-right: 4px; }
             .payment-details { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 8px; }
             .payment-details .row { border-bottom-color: #dcfce7; }
             .payment-details .row:last-child { border-bottom: none; }
+            .payment-details.contact-email { background: #f3e8ff; border-color: #d8b4fe; }
+            .payment-details.contact-email .row { border-bottom-color: #e9d5ff; }
+            .watermark { color: #f3f4f6; font-size: 120px; position: absolute; right: 20px; bottom: 20px; opacity: 0.1; font-weight: bold; }
+            .animal-section { background: #f0fdf4; border: 2px solid #86efac; border-radius: 8px; padding: 12px; }
+            .animal-section .section-title { color: #166534; border-bottom-color: #86efac; }
+            .receipt-content {
+              position: relative;
+              z-index: 1;
+            }
             @media print {
               body { background: white; }
               .receipt-container { box-shadow: none; padding: 20px; }
-              .no-print { display: none !important; }
             }
           </style>
         </head>
         <body>
-          <div class="receipt-container" style="position: relative;">
-            ${printContent.innerHTML}
+          <div class="receipt-container" style="position: relative; min-height: 800px;">
+            <div class="receipt-content">
+              ${printContent.innerHTML}
+            </div>
             <div class="watermark">TRACK FLOW</div>
           </div>
           <script>
-            window.onload = function() { window.print(); }
+            window.onload = function() { 
+              window.print();
+              setTimeout(function() {
+                window.close();
+              }, 1000);
+            }
           <\/script>
         </body>
       </html>
     `)
-
-    printWindow.document.close()
+    iframeDoc.close()
 
     setTimeout(() => {
+      document.body.removeChild(iframe)
       document.title = originalTitle
-    }, 1000)
+    }, 2000)
   }
 
+  // ✅ Fonction de téléchargement PDF améliorée - sans about:blank
   const handleDownloadPDF = () => {
     const printContent = receiptRef.current
     if (!printContent) return
@@ -114,21 +134,26 @@ const TrackingReceipt = ({ shipment, onClose }) => {
     const originalTitle = document.title
     document.title = `Tracking Receipt - ${shipment.trackingCode}`
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
-    if (!printWindow) {
-      alert('Please allow popups for download')
-      return
-    }
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'absolute'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = 'none'
+    iframe.style.visibility = 'hidden'
+    document.body.appendChild(iframe)
 
-    printWindow.document.write(`
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+    iframeDoc.open()
+    iframeDoc.write(`
+      <!DOCTYPE html>
       <html>
         <head>
           <title>Tracking Receipt - ${shipment.trackingCode}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; }
-            .receipt-container { max-width: 800px; margin: 0 auto; padding: 40px; position: relative; }
+            .receipt-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; position: relative; overflow: hidden; }
             .header { text-align: center; border-bottom: 3px solid #ea580c; padding-bottom: 20px; margin-bottom: 20px; }
-            .header-logo { max-height: 80px; width: auto; margin-bottom: 10px; }
+            .header-logo { max-height: 80px; width: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; object-fit: contain; }
             .header h1 { color: #ea580c; margin: 0; font-size: 24px; }
             .header p { color: #666; margin: 5px 0 0 0; }
             .tracking-code { background: #fff7ed; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 2px solid #ea580c; }
@@ -150,29 +175,44 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             .priority-normal { background: #dbeafe; color: #1e40af; }
             .priority-high { background: #fed7aa; color: #9a3412; }
             .priority-urgent { background: #fecaca; color: #991b1b; }
-            .watermark { color: #f3f4f6; font-size: 120px; position: absolute; right: 20px; bottom: 20px; opacity: 0.1; font-weight: bold; }
             .payment-details { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 8px; }
             .payment-details .row { border-bottom-color: #dcfce7; }
             .payment-details .row:last-child { border-bottom: none; }
+            .payment-details.contact-email { background: #f3e8ff; border-color: #d8b4fe; }
+            .payment-details.contact-email .row { border-bottom-color: #e9d5ff; }
+            .watermark { color: #f3f4f6; font-size: 120px; position: absolute; right: 20px; bottom: 20px; opacity: 0.1; font-weight: bold; }
+            .animal-section { background: #f0fdf4; border: 2px solid #86efac; border-radius: 8px; padding: 12px; }
+            .animal-section .section-title { color: #166534; border-bottom-color: #86efac; }
+            .receipt-content {
+              position: relative;
+              z-index: 1;
+            }
           </style>
         </head>
         <body>
-          <div class="receipt-container">
-            ${printContent.innerHTML}
+          <div class="receipt-container" style="position: relative; min-height: 800px;">
+            <div class="receipt-content">
+              ${printContent.innerHTML}
+            </div>
             <div class="watermark">TRACK FLOW</div>
           </div>
           <script>
-            window.onload = function() { window.print(); }
+            window.onload = function() { 
+              window.print();
+              setTimeout(function() {
+                window.close();
+              }, 1000);
+            }
           <\/script>
         </body>
       </html>
     `)
-
-    printWindow.document.close()
+    iframeDoc.close()
 
     setTimeout(() => {
+      document.body.removeChild(iframe)
       document.title = originalTitle
-    }, 1000)
+    }, 2000)
   }
 
   const getStatusBadgeClass = (status) => {
@@ -235,6 +275,16 @@ const TrackingReceipt = ({ shipment, onClose }) => {
       urgent: 'priority-urgent',
     }
     return classes[priority] || 'priority-normal'
+  }
+
+  // Noms des méthodes de paiement
+  const paymentMethodLabels = {
+    'bank-transfer': '🏦 Bank Transfer',
+    'paypal': '💰 PayPal',
+    'crypto': '₿ Crypto',
+    'cash': '💵 Cash',
+    'other': '🔗 Other',
+    'contact-email': '📧 Contact us by Email',
   }
 
   // Rendu des détails de paiement
@@ -320,18 +370,42 @@ const TrackingReceipt = ({ shipment, onClose }) => {
           </div>
         )
 
+      // ✅ Contact by Email - Version client
+      case 'contact-email':
+        return (
+          <div className="payment-details contact-email">
+            <p className="font-semibold text-sm text-purple-700 mb-2">📧 Contact us by Email</p>
+            <div className="row">
+              <span className="row-label">Bank Name</span>
+              <span className="row-value">{paymentDetails?.bankInfoPartial || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">Account (Partial)</span>
+              <span className="row-value">{paymentDetails?.accountNumberPartial || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">Reference Code</span>
+              <span className="row-value">{paymentDetails?.referenceCode || 'N/A'}</span>
+            </div>
+            <div className="row">
+              <span className="row-label">Contact Email</span>
+              <span className="row-value">{paymentDetails?.contactEmail || 'contact@trackflow.com'}</span>
+            </div>
+            {paymentDetails?.contactMessage && (
+              <div className="row">
+                <span className="row-label">Instructions</span>
+                <span className="row-value text-sm whitespace-pre-wrap">{paymentDetails.contactMessage}</span>
+              </div>
+            )}
+            <div className="mt-2 text-xs text-purple-600 italic">
+              💡 Please contact us by email to complete your payment
+            </div>
+          </div>
+        )
+
       default:
         return null
     }
-  }
-
-  // Noms des méthodes de paiement
-  const paymentMethodLabels = {
-    'bank-transfer': '🏦 Bank Transfer',
-    'paypal': '💰 PayPal',
-    'crypto': '₿ Crypto',
-    'cash': '💵 Cash',
-    'other': '🔗 Other'
   }
 
   return (
@@ -371,14 +445,21 @@ const TrackingReceipt = ({ shipment, onClose }) => {
 
         {/* Receipt Content */}
         <div ref={receiptRef} className="p-6 md:p-8">
-          {/* Header avec logo */}
+          {/* ✅ Header avec logo Track Flow - CORRIGÉ ET CENTRÉ */}
           <div className="text-center border-b-3 border-orange-500 pb-6 mb-6">
-            <img 
-              src={logo} 
-              alt="Track Flow" 
-              className="h-20 md:h-24 w-auto object-contain mx-auto mb-3"
-            />
-            <h1 className="text-2xl font-bold text-orange-600">Track Flow</h1>
+            <div className="flex justify-center items-center">
+              <img 
+                src={logo} 
+                alt="Track Flow" 
+                className="h-16 md:h-20 w-auto object-contain"
+                style={{ 
+                  maxWidth: '180px',
+                  transform: 'none',
+                  rotate: '0deg'
+                }}
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-orange-600 mt-3">Track Flow</h1>
             <p className="text-gray-500">Fast, Safe &amp; Affordable</p>
             <p className="text-xs text-gray-400 mt-1">www.trackflow.agency</p>
           </div>
@@ -401,7 +482,6 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 </span>
               </div>
             </div>
-            {/* ✅ Description du statut */}
             {shipment.statusDescription && (
               <div className="mt-3 p-3 bg-white/80 rounded-lg border border-orange-200 text-left">
                 <p className="text-sm text-gray-700">
@@ -411,8 +491,100 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             )}
           </div>
 
+          {/* 🐾 Animal Transport Section */}
+          {shipment.isAnimalTransport && (
+            <div className="section mt-4 animal-section">
+              <h3 className="section-title">🐾 Animal Transport Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {shipment.animalName && (
+                  <div className="row">
+                    <span className="row-label">Name</span>
+                    <span className="row-value font-semibold">{shipment.animalName}</span>
+                  </div>
+                )}
+                {shipment.animalType && (
+                  <div className="row">
+                    <span className="row-label">Type</span>
+                    <span className="row-value capitalize">{shipment.animalType}</span>
+                  </div>
+                )}
+                {shipment.animalBreed && (
+                  <div className="row">
+                    <span className="row-label">Breed</span>
+                    <span className="row-value">{shipment.animalBreed}</span>
+                  </div>
+                )}
+                {shipment.animalQuantity && (
+                  <div className="row">
+                    <span className="row-label">Quantity</span>
+                    <span className="row-value">{shipment.animalQuantity}</span>
+                  </div>
+                )}
+                {shipment.animalWeight && (
+                  <div className="row">
+                    <span className="row-label">Weight</span>
+                    <span className="row-value">{shipment.animalWeight} kg</span>
+                  </div>
+                )}
+                {shipment.animalAge && (
+                  <div className="row">
+                    <span className="row-label">Age</span>
+                    <span className="row-value">{shipment.animalAge}</span>
+                  </div>
+                )}
+                {shipment.animalCageType && (
+                  <div className="row">
+                    <span className="row-label">Cage Type</span>
+                    <span className="row-value capitalize">{shipment.animalCageType}</span>
+                  </div>
+                )}
+                <div className="row">
+                  <span className="row-label">Vaccinations</span>
+                  <span className="row-value">{shipment.animalVaccination ? '✅ Up to date' : '❌ Not specified'}</span>
+                </div>
+                {shipment.animalHealthCertificate && (
+                  <div className="row col-span-2">
+                    <span className="row-label">Health Certificate</span>
+                    <span className="row-value font-mono text-xs">{shipment.animalHealthCertificate}</span>
+                  </div>
+                )}
+                {shipment.animalFeedingInstructions && (
+                  <div className="row col-span-2">
+                    <span className="row-label">Feeding Instructions</span>
+                    <span className="row-value">{shipment.animalFeedingInstructions}</span>
+                  </div>
+                )}
+                {shipment.animalSpecialNeeds && (
+                  <div className="row col-span-2">
+                    <span className="row-label">Special Needs</span>
+                    <span className="row-value text-sm">{shipment.animalSpecialNeeds}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 📦 Product Info */}
+          <div className="section mt-4">
+            <h3 className="section-title">📦 Product Information</h3>
+            <div className="row">
+              <span className="row-label">Product Name</span>
+              <span className="row-value font-semibold">{shipment.productName || 'N/A'}</span>
+            </div>
+            {shipment.productDescription && (
+              <div className="row">
+                <span className="row-label">Description</span>
+                <span className="row-value">{shipment.productDescription}</span>
+              </div>
+            )}
+            <div className="row">
+              <span className="row-label">Departure Date</span>
+              <span className="row-value">{shipment.departureDateTime ? formatDate(shipment.departureDateTime) : 'N/A'}</span>
+            </div>
+          </div>
+
           {/* Grid 2 colonnes - Infos principales */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             {/* Shipment Info */}
             <div className="section">
               <h3 className="section-title">📦 Shipment Details</h3>
@@ -497,7 +669,6 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                   <span className="row-value text-xs">{shipment.currentLatitude}, {shipment.currentLongitude}</span>
                 </div>
               )}
-              {/* ✅ Date de création */}
               <div className="row">
                 <span className="row-label">Created</span>
                 <span className="row-value">{shipment.createdAt ? formatDate(shipment.createdAt) : 'N/A'}</span>
@@ -512,6 +683,18 @@ const TrackingReceipt = ({ shipment, onClose }) => {
               <div className="row">
                 <span className="row-label">Payment Method</span>
                 <span className="row-value">{paymentMethodLabels[shipment.paymentMethod] || shipment.paymentMethod}</span>
+              </div>
+              <div className="row">
+                <span className="row-label">Payment Status</span>
+                <span className={`row-value capitalize font-semibold ${
+                  shipment.paymentStatus === 'confirmed' ? 'text-green-600' :
+                  shipment.paymentStatus === 'pending' ? 'text-yellow-600' :
+                  shipment.paymentStatus === 'failed' ? 'text-red-600' :
+                  shipment.paymentStatus === 'refunded' ? 'text-gray-600' :
+                  ''
+                }`}>
+                  {shipment.paymentStatus || 'Pending'}
+                </span>
               </div>
               {renderPaymentDetails()}
             </div>
@@ -533,7 +716,6 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 <span className="row-label">Name</span>
                 <span className="row-value">{shipment.senderName || 'N/A'}</span>
               </div>
-              {/* ❌ Email et Phone supprimés - ne pas afficher */}
               <div className="row">
                 <span className="row-label">Address</span>
                 <span className="row-value">{shipment.senderAddress || 'N/A'}</span>
@@ -550,7 +732,6 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 <span className="row-label">Email</span>
                 <span className="row-value">{shipment.recipientEmail || 'N/A'}</span>
               </div>
-              {/* ✅ Téléphone du destinataire */}
               <div className="row">
                 <span className="row-label">Phone</span>
                 <span className="row-value">{shipment.recipientPhone || 'N/A'}</span>
