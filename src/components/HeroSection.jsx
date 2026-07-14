@@ -60,7 +60,7 @@ const HeroSection = () => {
           Your Delivery Matters
         </h2>
         <p className="text-lg md:text-xl max-w-2xl mb-8 text-gray-200">
-          Trans Dispatch makes every effort to make freight delivery less unpleasant. 
+          Cargo Track Flow makes every effort to make freight delivery less unpleasant. 
           That is why we have gathered a large tool collection to help simplify your 
           experience and make shipping with us easier.
         </p>

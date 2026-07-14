@@ -146,7 +146,7 @@ const TestimonialsGrid = () => {
       id: 1,
       name: 'Alice Martin',
       role: 'Verified Client',
-      quote: 'We are thoroughly pleased with the constant attention given to our account. Martin Marin ensures smooth and efficient custom clearance and delivery. We would definitely recommend using Trans Dispatch for any and all of your shipping needs.',
+      quote: 'We are thoroughly pleased with the constant attention given to our account. Martin Marin ensures smooth and efficient custom clearance and delivery. We would definitely recommend using Cargo Track Flow for any and all of your shipping needs.',
       rating: 5,
       location: 'New York, USA'
     },
@@ -162,7 +162,7 @@ const TestimonialsGrid = () => {
       id: 3,
       name: 'Dave Logan',
       role: 'Verified Client',
-      quote: 'Trans Dispatch is the one Company I would recommend to other importers. I forward the paperwork for air and ocean shipments and things are taken care of immediately. I get my necessary reports without fail.',
+      quote: 'Cargo Track Flow is the one Company I would recommend to other importers. I forward the paperwork for air and ocean shipments and things are taken care of immediately. I get my necessary reports without fail.',
       rating: 4,
       location: 'Chicago, USA'
     },
@@ -170,7 +170,7 @@ const TestimonialsGrid = () => {
       id: 4,
       name: 'Samantha Blake',
       role: 'Verified Client',
-      quote: 'Trans Dispatch has been a lifesaver for our business. The efficiency and attention to detail in handling our shipments are unmatched. I wouldn\'t trust anyone else with our logistics needs.',
+      quote: 'Cargo Track Flow has been a lifesaver for our business. The efficiency and attention to detail in handling our shipments are unmatched. I wouldn\'t trust anyone else with our logistics needs.',
       rating: 5,
       location: 'London, UK'
     },
@@ -186,7 +186,7 @@ const TestimonialsGrid = () => {
       id: 6,
       name: 'Natalie Kim',
       role: 'Verified Client',
-      quote: 'Trans Dispatch truly understands the urgency of our shipping requirements. The personal attention and quick responses make a world of difference. We are very satisfied with their services.',
+      quote: 'Cargo Track Flow truly understands the urgency of our shipping requirements. The personal attention and quick responses make a world of difference. We are very satisfied with their services.',
       rating: 5,
       location: 'Seoul, South Korea'
     },
@@ -194,7 +194,7 @@ const TestimonialsGrid = () => {
       id: 7,
       name: 'David Foster',
       role: 'Verified Client',
-      quote: 'Switching to Trans Dispatch was the best decision for our import business. The efficiency and professionalism exhibited by their team have greatly improved our operations. Excellent service!',
+      quote: 'Switching to Cargo Track Flow was the best decision for our import business. The efficiency and professionalism exhibited by their team have greatly improved our operations. Excellent service!',
       rating: 5,
       location: 'Sydney, Australia'
     },
@@ -210,7 +210,7 @@ const TestimonialsGrid = () => {
       id: 9,
       name: 'James Carter',
       role: 'Verified Client',
-      quote: 'Trans Dispatch has provided us with unparalleled support in managing our international shipments. The professionalism and prompt communication make them a standout choice for any business.',
+      quote: 'Cargo Track Flow has provided us with unparalleled support in managing our international shipments. The professionalism and prompt communication make them a standout choice for any business.',
       rating: 4,
       location: 'Toronto, Canada'
     },
@@ -218,7 +218,7 @@ const TestimonialsGrid = () => {
       id: 10,
       name: 'Olivia White',
       role: 'Verified Client',
-      quote: 'We have been using Trans Dispatch for all our shipping needs, and they have never disappointed. The reliability and efficiency are second to none. A truly exceptional service provider.',
+      quote: 'We have been using Cargo Track Flow for all our shipping needs, and they have never disappointed. The reliability and efficiency are second to none. A truly exceptional service provider.',
       rating: 5,
       location: 'Paris, France'
     },
@@ -226,7 +226,7 @@ const TestimonialsGrid = () => {
       id: 11,
       name: 'Liam Anderson',
       role: 'Verified Client',
-      quote: 'Trans Dispatch consistently delivers top-notch service. The team is always on top of our shipping requirements, ensuring everything runs smoothly. We highly recommend them to everyone.',
+      quote: 'Cargo Track Flow consistently delivers top-notch service. The team is always on top of our shipping requirements, ensuring everything runs smoothly. We highly recommend them to everyone.',
       rating: 5,
       location: 'Berlin, Germany'
     },
@@ -250,7 +250,7 @@ const TestimonialsGrid = () => {
       id: 14,
       name: 'Sophia Hernandez',
       role: 'Verified Client',
-      quote: 'Trans Dispatch has exceeded our expectations in every way. The dedicated service and the entire team make them our go-to logistics provider. We highly recommend their services.',
+      quote: 'Cargo Track Flow has exceeded our expectations in every way. The dedicated service and the entire team make them our go-to logistics provider. We highly recommend their services.',
       rating: 5,
       location: 'Mexico City, Mexico'
     },
@@ -258,7 +258,7 @@ const TestimonialsGrid = () => {
       id: 15,
       name: 'Noah Scott',
       role: 'Verified Client',
-      quote: 'Working with Trans Dispatch has been a game-changer for our shipping needs. The prompt and personalized service is remarkable. We couldn\'t be happier with their services.',
+      quote: 'Working with Cargo Track Flow has been a game-changer for our shipping needs. The prompt and personalized service is remarkable. We couldn\'t be happier with their services.',
       rating: 5,
       location: 'Dubai, UAE'
     },
@@ -274,7 +274,7 @@ const TestimonialsGrid = () => {
       id: 17,
       name: 'Daniel Thompson',
       role: 'Verified Client',
-      quote: 'Trans Dispatch has consistently delivered outstanding service. The professionalism and responsiveness have made a significant impact on our business operations.',
+      quote: 'Cargo Track Flow has consistently delivered outstanding service. The professionalism and responsiveness have made a significant impact on our business operations.',
       rating: 5,
       location: 'Auckland, New Zealand'
     },
@@ -290,7 +290,7 @@ const TestimonialsGrid = () => {
       id: 19,
       name: 'William Chen',
       role: 'Verified Client',
-      quote: 'Trans Dispatch has made international shipping so much easier for our business. Their team is professional, responsive, and always goes the extra mile to ensure satisfaction.',
+      quote: 'Cargo Track Flow has made international shipping so much easier for our business. Their team is professional, responsive, and always goes the extra mile to ensure satisfaction.',
       rating: 4,
       location: 'Shanghai, China'
     },
@@ -298,7 +298,7 @@ const TestimonialsGrid = () => {
       id: 20,
       name: 'Emma Wilson',
       role: 'Verified Client',
-      quote: 'The support and efficiency provided by Trans Dispatch is outstanding. They have streamlined our logistics and saved us both time and money. A truly professional service.',
+      quote: 'The support and efficiency provided by Cargo Track Flow is outstanding. They have streamlined our logistics and saved us both time and money. A truly professional service.',
       rating: 5,
       location: 'Dublin, Ireland'
     }

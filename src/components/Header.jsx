@@ -47,7 +47,7 @@ const Header = () => {
             >
               <img 
                 src={logo} 
-                alt="Trans Dispatch Express" 
+                alt="Cargo Track Flow Express" 
                 className="w-40 h-40 md:w-[308px] md:h-[308px] object-contain"
               />
             </Link>
@@ -115,7 +115,7 @@ const Header = () => {
             <div className="flex justify-between items-center p-6 border-b border-gray-100">
               <img 
                 src={logo} 
-                alt="Trans Dispatch Express" 
+                alt="Cargo Track Flow Express" 
                 className="h-12 w-auto object-contain"
               />
               <button

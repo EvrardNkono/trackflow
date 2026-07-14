@@ -34,7 +34,7 @@ const Footer = () => {
             <Link to="/" className="inline-block mb-4">
               <img 
                 src={logo} 
-                alt="Trans Dispatch Express" 
+                alt="Cargo Track Flow Express" 
                 className="h-16 md:h-20 w-auto object-contain"
               />
             </Link>
@@ -138,7 +138,7 @@ const Footer = () => {
         <div className="container-custom py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              Copyright © {currentYear} <span className="text-orange-400">Trans Dispatch Express</span>. All rights reserved.
+              Copyright © {currentYear} <span className="text-orange-400">Cargo Track Flow Express</span>. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Link to="/privacy" className="text-gray-400 hover:text-orange-400 transition-colors text-sm">

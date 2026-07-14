@@ -138,7 +138,7 @@ const UpdateShipment = () => {
     { value: 'Nippon Express', label: 'Nippon Express' },
     { value: 'Toll Group', label: 'Toll Group' },
     { value: 'Maersk', label: 'Maersk Logistics' },
-    { value: 'Trans Dispatch', label: '⭐ Trans Dispatch Premium' },
+    { value: 'Cargo Track Flow', label: '⭐ Cargo Track Flow Premium' },
   ]
 
   // 💳 Modes de paiement disponibles
@@ -275,8 +275,8 @@ const UpdateShipment = () => {
       senderAddress: 'Esplanaden 50, 1263 Copenhagen K, Denmark',
       senderTaxId: 'DK-637194825'
     },
-    'Trans Dispatch': { 
-      senderName: 'Trans Dispatch Premium', 
+    'Cargo Track Flow': { 
+      senderName: 'Cargo Track Flow Premium', 
       senderAddress: '123 Logistics Drive, New York, NY 10001',
       senderTaxId: 'US-736194528'
     }

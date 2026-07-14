@@ -70,7 +70,7 @@ const AboutHero = () => {
             </p>
             <p>
               Since every cargo we provide is centered on the needs of our customers, 
-              <strong className="text-orange-600"> Trans Dispatch Express</strong> is honored to 
+              <strong className="text-orange-600"> Cargo Track Flow Express</strong> is honored to 
               have received multiple prestigious accolades for great success in sales and customer 
               service. See our list of honors here.
             </p>

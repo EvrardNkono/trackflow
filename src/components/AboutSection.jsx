@@ -8,7 +8,7 @@ const AboutSection = () => {
           <div className="order-2 md:order-1">
             <img 
               src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80" 
-              alt="About Trans Dispatch" 
+              alt="About Cargo Track Flow" 
               className="rounded-lg shadow-xl w-full h-auto object-cover"
             />
           </div>
@@ -18,7 +18,7 @@ const AboutSection = () => {
             </h2>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
-                Let <strong className="text-orange-600">Trans Dispatch Express</strong> do the heavy lifting 
+                Let <strong className="text-orange-600">Cargo Track Flow Express</strong> do the heavy lifting 
                 for your business. From medical equipment to family room furniture, make deliveries 
                 convenient for your customers. Choosing us can also make pricing more straightforward 
                 and reduce transit times.
