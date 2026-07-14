@@ -105,7 +105,7 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             <div class="receipt-content">
               ${printContent.innerHTML}
             </div>
-            <div class="watermark">TRACK FLOW</div>
+            <div class="watermark">CARGO TRACK FLOW</div>
           </div>
           <script>
             window.onload = function() { 
@@ -194,7 +194,7 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             <div class="receipt-content">
               ${printContent.innerHTML}
             </div>
-            <div class="watermark">TRACK FLOW</div>
+            <div class="watermark">CARGO TRACK FLOW</div>
           </div>
           <script>
             window.onload = function() { 
@@ -459,9 +459,9 @@ const TrackingReceipt = ({ shipment, onClose }) => {
                 }}
               />
             </div>
-            <h1 className="text-2xl font-bold text-orange-600 mt-3">Track Flow</h1>
+            <h1 className="text-2xl font-bold text-orange-600 mt-3">Cargo Track Flow</h1>
             <p className="text-gray-500">Fast, Safe &amp; Affordable</p>
-            <p className="text-xs text-gray-400 mt-1">www.trackflow.agency</p>
+            <p className="text-xs text-gray-400 mt-1">www.cargotrackflow.com</p>
           </div>
 
           {/* Tracking Code & Status */}

@@ -38,6 +38,7 @@ const TrackingMap = ({ shipment }) => {
 
   const currentLat = parseFloat(shipment.currentLatitude)
   const currentLng = parseFloat(shipment.currentLongitude)
+  console.log('DEBUG coords:', currentLat, currentLng, shipment.currentLatitude, shipment.currentLongitude)
   const hasValidCoords = !isNaN(currentLat) && !isNaN(currentLng) && currentLat !== 0 && currentLng !== 0
 
   // Coordonnées par défaut (centré sur Paris si pas de coords)
