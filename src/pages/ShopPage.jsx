@@ -1,6 +1,6 @@
 // src/pages/ShopPage.jsx
 import React, { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { Search, ShoppingBag, ImageOff, Plus } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useCart } from '../context/CartContext'
 const ShopPage = () => {
   const { products, loading } = useProducts()
   const { addItem } = useCart()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [category, setCategory] = useState('all')
 
@@ -82,10 +83,15 @@ const ShopPage = () => {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredProducts.map(product => (
-                <Link
+                <div
                   key={product.id}
-                  to={`/shop/${product.id}`}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group relative"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => navigate(`/shop/${product.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') navigate(`/shop/${product.id}`)
+                  }}
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group relative cursor-pointer"
                 >
                   <div className="aspect-square bg-gray-100 overflow-hidden">
                     {product.images?.[0]?.url ? (
@@ -115,8 +121,8 @@ const ShopPage = () => {
                       <span className="inline-block mt-2 text-xs font-semibold text-red-600">Out of stock</span>
                     ) : (
                       <button
+                        type="button"
                         onClick={(e) => {
-                          e.preventDefault()
                           e.stopPropagation()
                           addItem(product)
                         }}
@@ -127,7 +133,7 @@ const ShopPage = () => {
                       </button>
                     )}
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
