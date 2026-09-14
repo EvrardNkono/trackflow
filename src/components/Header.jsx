@@ -1,19 +1,23 @@
 // src/components/Header.jsx
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { ShoppingCart } from 'lucide-react'
 import logo from '/images/logo.png'
 import LoginModal from './LoginModal'
+import { useCart } from '../context/CartContext'
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [clickCount, setClickCount] = useState(0)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const location = useLocation()
+  const { totalItems, setIsCartOpen } = useCart()
 
   const menuItems = [
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Services', path: '/services' },
+    { name: 'Shop', path: '/shop' },
     { name: 'Customer Reviews', path: '/reviews' },
     { name: 'Blog', path: '/blog' },
     { name: 'Contact', path: '/contact' }
@@ -71,6 +75,18 @@ const Header = () => {
               >
                 Track Shipment
               </a>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative text-white hover:text-orange-200 transition-colors"
+                aria-label="Open cart"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-orange-800 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
             </nav>
 
             {/* Mobile Menu Button */}
@@ -145,7 +161,7 @@ const Header = () => {
                 </Link>
               ))}
               
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 space-y-2">
                 <a
                   href="#tracking"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -153,6 +169,16 @@ const Header = () => {
                 >
                   Track Shipment
                 </a>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    setIsCartOpen(true)
+                  }}
+                  className="flex items-center justify-center gap-2 w-full text-center border-2 border-orange-600 text-orange-600 hover:bg-orange-50 font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Cart {totalItems > 0 ? `(${totalItems})` : ''}
+                </button>
               </div>
             </nav>
           </div>

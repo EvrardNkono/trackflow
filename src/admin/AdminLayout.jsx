@@ -1,7 +1,7 @@
 // src/admin/AdminLayout.jsx
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Package, Plus, List, Home } from 'lucide-react'
+import { Package, Plus, List, Home, ShoppingBag, PackagePlus } from 'lucide-react'
 
 const AdminLayout = ({ children }) => {
   const location = useLocation()
@@ -10,6 +10,8 @@ const AdminLayout = ({ children }) => {
     { name: 'Dashboard', path: '/admin', icon: Home },
     { name: 'New Shipment', path: '/admin/create', icon: Plus },
     { name: 'All Shipments', path: '/admin/shipments', icon: List },
+    { name: 'New Product', path: '/admin/products/create', icon: PackagePlus },
+    { name: 'All Products', path: '/admin/products', icon: ShoppingBag },
   ]
 
   return (

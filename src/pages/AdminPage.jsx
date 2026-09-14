@@ -7,6 +7,10 @@ import CreateShipment from '../admin/CreateShipment'
 import ShipmentList from '../admin/ShipmentList'
 import ShipmentDetails from '../admin/ShipmentDetails'
 import UpdateShipment from '../admin/UpdateShipment'
+import ProductList from '../admin/ProductList'
+import CreateProduct from '../admin/CreateProduct'
+import ProductDetails from '../admin/ProductDetails'
+import UpdateProduct from '../admin/UpdateProduct'
 
 const AdminPage = () => {
   return (
@@ -17,6 +21,12 @@ const AdminPage = () => {
         <Route path="shipments" element={<ShipmentList />} />
         <Route path="shipment/:id" element={<ShipmentDetails />} />
         <Route path="update/:id" element={<UpdateShipment />} />
+
+        {/* Products */}
+        <Route path="products" element={<ProductList />} />
+        <Route path="products/create" element={<CreateProduct />} />
+        <Route path="products/:id" element={<ProductDetails />} />
+        <Route path="products/update/:id" element={<UpdateProduct />} />
       </Routes>
     </AdminLayout>
   )
