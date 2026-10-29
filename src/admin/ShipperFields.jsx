@@ -12,7 +12,7 @@ const inputClass =
 const Field = ({ label, required, optional, hint, className = '', children }) => (
   <div className={className}>
     <label className="block text-sm font-medium text-gray-700 mb-1">
-      {label} {required && '*'}
+      {label}
       {optional && <span className="text-gray-400 text-xs"> (Optional)</span>}
     </label>
     {children}
@@ -73,13 +73,12 @@ const ShipperFields = ({ formData, onChange }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
         {isCompany ? (
           <>
-            <Field label="Company Name" required>
+            <Field label="Company Name">
               <input
                 type="text"
                 name="shipperCompanyName"
                 value={formData.shipperCompanyName}
                 onChange={onChange}
-                required
                 placeholder="e.g., Dupont Import Export SARL"
                 className={inputClass}
               />
@@ -107,24 +106,22 @@ const ShipperFields = ({ formData, onChange }) => {
           </>
         ) : (
           <>
-            <Field label="First Name" required>
+            <Field label="First Name">
               <input
                 type="text"
                 name="shipperFirstName"
                 value={formData.shipperFirstName}
                 onChange={onChange}
-                required
                 placeholder="e.g., Jean"
                 className={inputClass}
               />
             </Field>
-            <Field label="Last Name" required>
+            <Field label="Last Name">
               <input
                 type="text"
                 name="shipperLastName"
                 value={formData.shipperLastName}
                 onChange={onChange}
-                required
                 placeholder="e.g., Dupont"
                 className={inputClass}
               />
@@ -132,13 +129,12 @@ const ShipperFields = ({ formData, onChange }) => {
           </>
         )}
 
-        <Field label="Email" required>
+        <Field label="Email">
           <input
             type="email"
             name="shipperEmail"
             value={formData.shipperEmail}
             onChange={onChange}
-            required
             placeholder="shipper@example.com"
             className={inputClass}
           />
@@ -154,24 +150,22 @@ const ShipperFields = ({ formData, onChange }) => {
           />
         </Field>
 
-        <Field label={isCompany ? 'Company Address' : 'Address'} required className="md:col-span-2">
+        <Field label={isCompany ? 'Company Address' : 'Address'} className="md:col-span-2">
           <input
             type="text"
             name="shipperAddress"
             value={formData.shipperAddress}
             onChange={onChange}
-            required
             placeholder="e.g., 12 Rue de la Paix"
             className={inputClass}
           />
         </Field>
-        <Field label="City" required>
+        <Field label="City">
           <input
             type="text"
             name="shipperCity"
             value={formData.shipperCity}
             onChange={onChange}
-            required
             placeholder="e.g., Paris"
             className={inputClass}
           />
@@ -186,12 +180,11 @@ const ShipperFields = ({ formData, onChange }) => {
             className={inputClass}
           />
         </Field>
-        <Field label="Country" required className="md:col-span-2">
+        <Field label="Country" className="md:col-span-2">
           <select
             name="shipperCountry"
             value={formData.shipperCountry}
             onChange={onChange}
-            required
             className={inputClass}
           >
             <option value="">Select country...</option>

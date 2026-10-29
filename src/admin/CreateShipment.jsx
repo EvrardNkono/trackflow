@@ -295,7 +295,7 @@ const CreateShipment = () => {
               <p className="text-xs text-blue-600 font-semibold mb-2">🏦 Bank Transfer Details</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
               <input
                 type="text"
                 name="bankName"
@@ -303,11 +303,10 @@ const CreateShipment = () => {
                 onChange={handlePaymentDetailChange}
                 placeholder="e.g., Barclays Bank"
                 className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder</label>
               <input
                 type="text"
                 name="accountHolder"
@@ -315,11 +314,10 @@ const CreateShipment = () => {
                 onChange={handlePaymentDetailChange}
                 placeholder="e.g., Track Flow Ltd"
                 className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">IBAN *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">IBAN</label>
               <input
                 type="text"
                 name="iban"
@@ -327,7 +325,6 @@ const CreateShipment = () => {
                 onChange={handlePaymentDetailChange}
                 placeholder="e.g., GB29NWBK60161331926819"
                 className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                required
               />
             </div>
             <div>
@@ -349,7 +346,7 @@ const CreateShipment = () => {
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-600 font-semibold mb-2">💰 PayPal Details</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Email *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Email</label>
               <input
                 type="email"
                 name="paypalEmail"
@@ -357,7 +354,6 @@ const CreateShipment = () => {
                 onChange={handlePaymentDetailChange}
                 placeholder="e.g., payments@trackflow.com"
                 className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                required
               />
             </div>
           </div>
@@ -369,13 +365,12 @@ const CreateShipment = () => {
             <p className="text-xs text-blue-600 font-semibold mb-2">₿ Crypto Details</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cryptocurrency *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cryptocurrency</label>
                 <select
                   name="cryptoType"
                   value={formData.paymentDetails.cryptoType}
                   onChange={handlePaymentDetailChange}
                   className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                  required
                 >
                   {cryptoTypes.map(crypto => (
                     <option key={crypto.value} value={crypto.value}>
@@ -385,7 +380,7 @@ const CreateShipment = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Wallet Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wallet Address</label>
                 <input
                   type="text"
                   name="cryptoWallet"
@@ -393,7 +388,6 @@ const CreateShipment = () => {
                   onChange={handlePaymentDetailChange}
                   placeholder="e.g., 0x1234567890abcdef..."
                   className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                  required
                 />
               </div>
             </div>
@@ -405,13 +399,12 @@ const CreateShipment = () => {
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-600 font-semibold mb-2">💵 Cash Details</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Currency *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
               <select
                 name="cashCurrency"
                 value={formData.paymentDetails.cashCurrency}
                 onChange={handlePaymentDetailChange}
                 className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                required
               >
                 <option value="USD">💵 USD</option>
                 <option value="EUR">💶 EUR</option>
@@ -434,7 +427,7 @@ const CreateShipment = () => {
             <p className="text-xs text-blue-600 font-semibold mb-2">🔗 Custom Payment Method</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method Name</label>
                 <input
                   type="text"
                   name="otherLabel"
@@ -442,11 +435,10 @@ const CreateShipment = () => {
                   onChange={handlePaymentDetailChange}
                   placeholder="e.g., Western Union, MoneyGram, etc."
                   className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
-                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details</label>
                 <textarea
                   name="otherDetails"
                   value={formData.paymentDetails.otherDetails}
@@ -454,7 +446,6 @@ const CreateShipment = () => {
                   rows="3"
                   placeholder="Enter all necessary payment details..."
                   className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none"
-                  required
                 />
               </div>
             </div>
@@ -481,7 +472,7 @@ const CreateShipment = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bank Name (Visible to customer) *
+                  Bank Name (Visible to customer)
                 </label>
                 <input
                   type="text"
@@ -490,14 +481,13 @@ const CreateShipment = () => {
                   onChange={handlePaymentDetailChange}
                   placeholder="e.g., Barclays Bank"
                   className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
-                  required
                 />
                 <p className="text-xs text-gray-400 mt-1">This will be visible to the customer</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Account Number (Partial - Visible) *
+                  Account Number (Partial - Visible)
                 </label>
                 <input
                   type="text"
@@ -506,14 +496,13 @@ const CreateShipment = () => {
                   onChange={handlePaymentDetailChange}
                   placeholder="e.g., ****3192"
                   className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
-                  required
                 />
                 <p className="text-xs text-gray-400 mt-1">Only last 4 digits for security</p>
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reference Code / Order ID (Visible) *
+                  Reference Code / Order ID (Visible)
                 </label>
                 <input
                   type="text"
@@ -522,14 +511,13 @@ const CreateShipment = () => {
                   onChange={handlePaymentDetailChange}
                   placeholder="e.g., TRK-2024-001, PO-12345"
                   className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
-                  required
                 />
                 <p className="text-xs text-gray-400 mt-1">This reference will help identify the payment</p>
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contact Email *
+                  Contact Email
                 </label>
                 <input
                   type="email"
@@ -538,7 +526,6 @@ const CreateShipment = () => {
                   onChange={handlePaymentDetailChange}
                   placeholder="contact@trackflow.com"
                   className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
-                  required
                 />
                 <p className="text-xs text-gray-400 mt-1">Email address where customers should send payment confirmation</p>
               </div>
@@ -645,7 +632,7 @@ const CreateShipment = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Animal Name *
+                    Animal Name
                   </label>
                   <input
                     type="text"
@@ -658,7 +645,7 @@ const CreateShipment = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Animal Type *
+                    Animal Type
                   </label>
                   <select
                     name="animalType"
@@ -819,14 +806,13 @@ const CreateShipment = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Name {isAnimal ? <span className="text-green-600 text-xs">(Auto-filled from animal name)</span> : '*'}
+                Product Name {isAnimal ? <span className="text-green-600 text-xs">(Auto-filled from animal name)</span> : null}
               </label>
               <input
                 type="text"
                 name="productName"
                 value={formData.productName}
                 onChange={handleChange}
-                required={!isAnimal}
                 readOnly={isAnimal}
                 placeholder={isAnimal ? 'Auto-filled from animal name' : 'e.g., iPhone 15 Pro, Labrador Puppy'}
                 className={`w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none ${
@@ -861,41 +847,38 @@ const CreateShipment = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Current Location *
+                Current Location
               </label>
               <input
                 type="text"
                 name="currentLocation"
                 value={formData.currentLocation}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 placeholder="e.g., Los Angeles, CA"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estimated Delivery *
+                Estimated Delivery
               </label>
               <input
                 type="datetime-local"
                 name="estimatedDelivery"
                 value={formData.estimatedDelivery}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Departure Date & Time *
+                Departure Date & Time
               </label>
               <input
                 type="datetime-local"
                 name="departureDateTime"
                 value={formData.departureDateTime}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
@@ -941,7 +924,7 @@ const CreateShipment = () => {
           
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Logistics Partner * <span className="text-xs text-gray-400">(Select a premium carrier)</span>
+              Logistics Partner <span className="text-xs text-gray-400">(Select a premium carrier)</span>
             </label>
             <select
               name="senderCompany"
@@ -1012,13 +995,12 @@ const CreateShipment = () => {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
               <input
                 type="text"
                 name="senderAddress"
                 value={formData.senderAddress}
                 onChange={handleChange}
-                required
                 placeholder="e.g., Schiphol Boulevard 100, 1118 BG Schiphol, Netherlands"
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
               />
@@ -1034,25 +1016,23 @@ const CreateShipment = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
               <input
                 type="text"
                 name="recipientName"
                 value={formData.recipientName}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 placeholder="Jane Smith"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
                 type="email"
                 name="recipientEmail"
                 value={formData.recipientEmail}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 placeholder="jane@example.com"
               />
@@ -1069,25 +1049,23 @@ const CreateShipment = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
               <input
                 type="text"
                 name="recipientAddress"
                 value={formData.recipientAddress}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 placeholder="456 Oak Ave, New York, NY 10001"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input
                 type="text"
                 name="recipientCity"
                 value={formData.recipientCity}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 placeholder="New York"
               />
@@ -1298,14 +1276,13 @@ const CreateShipment = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Courier Name *
+                Courier Name
               </label>
               <input
                 type="text"
                 name="courierName"
                 value={formData.courierName}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 placeholder="e.g., Martin Marin"
               />
@@ -1353,7 +1330,7 @@ const CreateShipment = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Select Payment Method *
+                Select Payment Method
               </label>
               <select
                 value={formData.paymentMethod}
@@ -1369,7 +1346,7 @@ const CreateShipment = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Payment Status *
+                Payment Status
               </label>
               <select
                 name="paymentStatus"

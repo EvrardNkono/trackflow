@@ -411,7 +411,7 @@ const UpdateShipment = () => {
               <p className="text-xs text-blue-600 font-semibold mb-2">🏦 Bank Transfer Details</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
               <input
                 type="text"
                 name="bankName"
@@ -422,7 +422,7 @@ const UpdateShipment = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder</label>
               <input
                 type="text"
                 name="accountHolder"
@@ -433,7 +433,7 @@ const UpdateShipment = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">IBAN *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">IBAN</label>
               <input
                 type="text"
                 name="iban"
@@ -462,7 +462,7 @@ const UpdateShipment = () => {
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-600 font-semibold mb-2">💰 PayPal Details</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Email *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">PayPal Email</label>
               <input
                 type="email"
                 name="paypalEmail"
@@ -481,7 +481,7 @@ const UpdateShipment = () => {
             <p className="text-xs text-blue-600 font-semibold mb-2">₿ Crypto Details</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cryptocurrency *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cryptocurrency</label>
                 <select
                   name="cryptoType"
                   value={formData.paymentDetails.cryptoType}
@@ -496,7 +496,7 @@ const UpdateShipment = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Wallet Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wallet Address</label>
                 <input
                   type="text"
                   name="cryptoWallet"
@@ -515,7 +515,7 @@ const UpdateShipment = () => {
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-600 font-semibold mb-2">💵 Cash Details</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Currency *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
               <select
                 name="cashCurrency"
                 value={formData.paymentDetails.cashCurrency}
@@ -543,7 +543,7 @@ const UpdateShipment = () => {
             <p className="text-xs text-blue-600 font-semibold mb-2">🔗 Custom Payment Method</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method Name</label>
                 <input
                   type="text"
                   name="otherLabel"
@@ -554,7 +554,7 @@ const UpdateShipment = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details</label>
                 <textarea
                   name="otherDetails"
                   value={formData.paymentDetails.otherDetails}
@@ -588,7 +588,7 @@ const UpdateShipment = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bank Name (Visible to customer) *
+                  Bank Name (Visible to customer)
                 </label>
                 <input
                   type="text"
@@ -603,7 +603,7 @@ const UpdateShipment = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Account Number (Partial - Visible) *
+                  Account Number (Partial - Visible)
                 </label>
                 <input
                   type="text"
@@ -618,7 +618,7 @@ const UpdateShipment = () => {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reference Code / Order ID (Visible) *
+                  Reference Code / Order ID (Visible)
                 </label>
                 <input
                   type="text"
@@ -633,7 +633,7 @@ const UpdateShipment = () => {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contact Email *
+                  Contact Email
                 </label>
                 <input
                   type="email"
@@ -708,7 +708,7 @@ const UpdateShipment = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status *
+                    Status
                   </label>
                   <select
                     name="status"
@@ -780,7 +780,7 @@ const UpdateShipment = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Animal Name *
+                        Animal Name
                       </label>
                       <input
                         type="text"
@@ -793,7 +793,7 @@ const UpdateShipment = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Animal Type *
+                        Animal Type
                       </label>
                       <select
                         name="animalType"
@@ -954,14 +954,13 @@ const UpdateShipment = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Name {isAnimal ? <span className="text-green-600 text-xs">(Auto-filled from animal name)</span> : '*'}
+                    Product Name {isAnimal ? <span className="text-green-600 text-xs">(Auto-filled from animal name)</span> : null}
                   </label>
                   <input
                     type="text"
                     name="productName"
                     value={formData.productName}
                     onChange={handleChange}
-                    required={!isAnimal}
                     readOnly={isAnimal}
                     placeholder={isAnimal ? 'Auto-filled from animal name' : 'e.g., iPhone 15 Pro, Labrador Puppy'}
                     className={`w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none ${
@@ -996,7 +995,7 @@ const UpdateShipment = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Location *
+                    Current Location
                   </label>
                   <input
                     type="text"
@@ -1073,7 +1072,7 @@ const UpdateShipment = () => {
               
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Logistics Partner * <span className="text-xs text-gray-400">(Select a premium carrier)</span>
+                  Logistics Partner <span className="text-xs text-gray-400">(Select a premium carrier)</span>
                 </label>
                 <select
                   name="senderCompany"
@@ -1136,13 +1135,12 @@ const UpdateShipment = () => {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                   <input
                     type="text"
                     name="senderAddress"
                     value={formData.senderAddress}
                     onChange={handleChange}
-                    required
                     placeholder="e.g., Schiphol Boulevard 100, 1118 BG Schiphol, Netherlands"
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                   />
@@ -1157,7 +1155,7 @@ const UpdateShipment = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                   <input
                     type="text"
                     name="recipientName"
@@ -1168,7 +1166,7 @@ const UpdateShipment = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input
                     type="email"
                     name="recipientEmail"
@@ -1190,7 +1188,7 @@ const UpdateShipment = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                   <input
                     type="text"
                     name="recipientAddress"
@@ -1201,7 +1199,7 @@ const UpdateShipment = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
                   <input
                     type="text"
                     name="recipientCity"
@@ -1470,7 +1468,7 @@ const UpdateShipment = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select Payment Method *
+                    Select Payment Method
                   </label>
                   <select
                     value={formData.paymentMethod}
@@ -1486,7 +1484,7 @@ const UpdateShipment = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Status *
+                    Payment Status
                   </label>
                   <select
                     name="paymentStatus"
