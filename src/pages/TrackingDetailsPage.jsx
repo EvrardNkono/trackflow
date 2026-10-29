@@ -15,6 +15,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import TrackingMap from '../components/TrackingMap'
 import TrackingReceipt from '../components/TrackingReceipt'
+import ShipperInfoCard from '../components/ShipperInfoCard'
 
 const TrackingDetailsPage = () => {
   const { id } = useParams()
@@ -1005,11 +1006,14 @@ const TrackingDetailsPage = () => {
               </div>
             )}
 
-            {/* Sender Info */}
+            {/* Shipper (personne ou entreprise qui envoie le colis) */}
+            <ShipperInfoCard shipment={shipment} variant="public" />
+
+            {/* Delivery Company Info */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Building className="w-5 h-5 text-orange-500" />
-                Sender
+                Delivery Company
               </h3>
               <div className="space-y-2 text-sm">
                 {shipment.senderCompany && (

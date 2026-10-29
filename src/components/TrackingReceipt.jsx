@@ -2,11 +2,66 @@
 import React, { useRef } from 'react'
 import { Download, Printer, FileText } from 'lucide-react'
 import logo from '/images/logo.png'
+import { getShipperDisplay, getRecipientAddressLines } from '../utils/shipper'
+
+// 🎨 Styles de la section « Parties » (Shipper → Recipient + compagnie de livraison).
+// Injectés DANS le reçu : ils s'appliquent à l'écran ET dans l'impression / le PDF
+// (le contenu du reçu est copié tel quel dans l'iframe d'impression).
+const PARTIES_CSS = `
+  .parties { margin: 0 0 24px 0; font-family: inherit; }
+  .parties, .parties * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
+  .parties-route { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); align-items: stretch; }
+  .parties-route.single { grid-template-columns: minmax(0, 1fr); }
+  .party-card { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; break-inside: avoid; page-break-inside: avoid; display: flex; flex-direction: column; }
+  .party-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 14px; border-bottom: 1px solid #e5e7eb; }
+  .party-role { font-size: 10px; letter-spacing: 0.14em; font-weight: 800; text-transform: uppercase; }
+  .party-badge { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 9999px; white-space: nowrap; }
+  .party-shipper .party-head { background: #fff7ed; border-bottom-color: #fed7aa; }
+  .party-shipper .party-role { color: #c2410c; }
+  .party-shipper .party-badge { background: #ffedd5; color: #9a3412; }
+  .party-recipient .party-head { background: #ecfdf5; border-bottom-color: #a7f3d0; }
+  .party-recipient .party-role { color: #047857; }
+  .party-recipient .party-badge { background: #d1fae5; color: #065f46; }
+  .party-body { padding: 14px; flex: 1; }
+  .party-name { font-size: 17px; font-weight: 800; color: #111827; line-height: 1.25; overflow-wrap: anywhere; }
+  .party-sub { font-size: 12px; color: #6b7280; margin-top: 3px; overflow-wrap: anywhere; }
+  .party-sub .mono { font-family: ui-monospace, Menlo, Consolas, monospace; color: #374151; }
+  .party-address { margin-top: 12px; font-size: 13px; line-height: 1.55; color: #374151; overflow-wrap: anywhere; }
+  .party-address .addr-label, .party-contact .c-label, .carrier-label { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: #9ca3af; }
+  .party-address .addr-label { display: block; margin-bottom: 2px; }
+  .party-address .country { font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em; }
+  .party-contact { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #d1d5db; display: grid; gap: 5px; font-size: 12.5px; color: #374151; }
+  .party-contact .c-row { display: flex; gap: 10px; align-items: baseline; }
+  .party-contact .c-label { width: 42px; flex-shrink: 0; }
+  .party-contact .c-value { overflow-wrap: anywhere; font-weight: 600; }
+  .party-empty { font-size: 12.5px; color: #9ca3af; font-style: italic; }
+  .party-arrow { display: flex; align-items: center; justify-content: center; }
+  .party-arrow span { width: 30px; height: 30px; border-radius: 9999px; background: #ea580c; color: #ffffff; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
+  .carrier-band { margin-top: 12px; border: 1px solid #1f2937; border-radius: 12px; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
+  .carrier-title { background: #1f2937; color: #ffffff; padding: 8px 14px; font-size: 10px; letter-spacing: 0.14em; font-weight: 800; text-transform: uppercase; display: flex; justify-content: space-between; gap: 8px; }
+  .carrier-title .carrier-title-right { color: #fdba74; letter-spacing: 0.06em; }
+  .carrier-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 18px; padding: 12px 14px; background: #f9fafb; }
+  .carrier-cell { min-width: 0; }
+  .carrier-cell.wide { grid-column: span 2; }
+  .carrier-label { display: block; margin-bottom: 2px; }
+  .carrier-value { font-size: 13px; font-weight: 700; color: #111827; overflow-wrap: anywhere; }
+  .carrier-value.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+  @media screen and (max-width: 560px) {
+    .parties-route { grid-template-columns: minmax(0, 1fr); row-gap: 6px; }
+    .party-arrow span { transform: rotate(90deg); }
+    .carrier-grid { grid-template-columns: minmax(0, 1fr); }
+    .carrier-cell.wide { grid-column: auto; }
+  }
+`
 
 const TrackingReceipt = ({ shipment, onClose }) => {
   const receiptRef = useRef(null)
 
   if (!shipment) return null
+
+  const shipper = getShipperDisplay(shipment)
+  const recipientLines = getRecipientAddressLines(shipment)
+  const carrierName = shipment.senderName || shipment.senderCompany
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
@@ -491,6 +546,119 @@ const TrackingReceipt = ({ shipment, onClose }) => {
             )}
           </div>
 
+          {/* 🧭 Parties : Shipper → Recipient, acheminé par la compagnie de livraison */}
+          <div className="parties">
+            <style>{PARTIES_CSS}</style>
+
+            <div className={`parties-route ${shipper.hasData ? '' : 'single'}`}>
+              {/* FROM — Shipper (personne ou entreprise) */}
+              {shipper.hasData && (
+                <div className="party-card party-shipper">
+                  <div className="party-head">
+                    <span className="party-role">From · Shipper</span>
+                    <span className="party-badge">{shipper.isCompany ? '🏢' : '👤'} {shipper.typeLabel}</span>
+                  </div>
+                  <div className="party-body">
+                    <div className="party-name">{shipper.displayName || 'N/A'}</div>
+                    {shipper.contactName && (
+                      <div className="party-sub">Contact: {shipper.contactName}</div>
+                    )}
+                    {shipper.taxId && (
+                      <div className="party-sub">Tax ID: <span className="mono">{shipper.taxId}</span></div>
+                    )}
+                    <div className="party-address">
+                      <span className="addr-label">{shipper.isCompany ? 'Company address' : 'Address'}</span>
+                      {shipper.addressLines.length > 0 ? (
+                        shipper.addressLines.map((line, i) => (
+                          <div key={i} className={i === shipper.addressLines.length - 1 && shipper.addressLines.length > 1 ? 'country' : ''}>{line}</div>
+                        ))
+                      ) : (
+                        <div className="party-empty">Not provided</div>
+                      )}
+                    </div>
+                    {(shipper.email || shipper.phone) && (
+                      <div className="party-contact">
+                        {shipper.email && (
+                          <div className="c-row"><span className="c-label">Email</span><span className="c-value">{shipper.email}</span></div>
+                        )}
+                        {shipper.phone && (
+                          <div className="c-row"><span className="c-label">Phone</span><span className="c-value">{shipper.phone}</span></div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {shipper.hasData && (
+                <div className="party-arrow"><span>→</span></div>
+              )}
+
+              {/* TO — Recipient */}
+              <div className="party-card party-recipient">
+                <div className="party-head">
+                  <span className="party-role">To · Recipient</span>
+                  <span className="party-badge">📍 Destination</span>
+                </div>
+                <div className="party-body">
+                  <div className="party-name">{shipment.recipientName || 'N/A'}</div>
+                  <div className="party-address">
+                    <span className="addr-label">Delivery address</span>
+                    {recipientLines.length > 0 ? (
+                      recipientLines.map((line, i) => (
+                        <div key={i} className={i === recipientLines.length - 1 && recipientLines.length > 1 ? 'country' : ''}>{line}</div>
+                      ))
+                    ) : (
+                      <div className="party-empty">Not provided</div>
+                    )}
+                  </div>
+                  {(shipment.recipientEmail || shipment.recipientPhone) && (
+                    <div className="party-contact">
+                      {shipment.recipientEmail && (
+                        <div className="c-row"><span className="c-label">Email</span><span className="c-value">{shipment.recipientEmail}</span></div>
+                      )}
+                      {shipment.recipientPhone && (
+                        <div className="c-row"><span className="c-label">Phone</span><span className="c-value">{shipment.recipientPhone}</span></div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 🚚 Compagnie de livraison */}
+            {(shipment.senderCompany || shipment.senderName || shipment.senderAddress) && (
+              <div className="carrier-band">
+                <div className="carrier-title">
+                  <span>🚚 Carried by · Delivery company</span>
+                  {shipment.senderCompany && <span className="carrier-title-right">{shipment.senderCompany}</span>}
+                </div>
+                <div className="carrier-grid">
+                  <div className="carrier-cell">
+                    <span className="carrier-label">Company</span>
+                    <span className="carrier-value">{carrierName || 'N/A'}</span>
+                  </div>
+                  {shipment.senderTaxId && (
+                    <div className="carrier-cell">
+                      <span className="carrier-label">Tax ID</span>
+                      <span className="carrier-value mono">{shipment.senderTaxId}</span>
+                    </div>
+                  )}
+                  {(shipment.senderEmail || shipment.senderPhone) && (
+                    <div className="carrier-cell">
+                      <span className="carrier-label">Contact</span>
+                      <span className="carrier-value">{[shipment.senderEmail, shipment.senderPhone].filter(Boolean).join(' · ')}</span>
+                    </div>
+                  )}
+                  <div className="carrier-cell wide">
+                    <span className="carrier-label">Address</span>
+                    <span className="carrier-value">{shipment.senderAddress || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 🐾 Animal Transport Section */}
           {shipment.isAnimalTransport && (
             <div className="section mt-4 animal-section">
@@ -699,61 +867,6 @@ const TrackingReceipt = ({ shipment, onClose }) => {
               {renderPaymentDetails()}
             </div>
           )}
-
-          {/* Sender & Recipient */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <div className="section">
-              <h3 className="section-title">📤 Sender</h3>
-              <div className="row">
-                <span className="row-label">Company</span>
-                <span className="row-value font-semibold">{shipment.senderCompany || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Tax ID</span>
-                <span className="row-value font-mono text-xs">{shipment.senderTaxId || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Name</span>
-                <span className="row-value">{shipment.senderName || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Address</span>
-                <span className="row-value">{shipment.senderAddress || 'N/A'}</span>
-              </div>
-            </div>
-
-            <div className="section">
-              <h3 className="section-title">📬 Recipient</h3>
-              <div className="row">
-                <span className="row-label">Name</span>
-                <span className="row-value">{shipment.recipientName || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Email</span>
-                <span className="row-value">{shipment.recipientEmail || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Phone</span>
-                <span className="row-value">{shipment.recipientPhone || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">City</span>
-                <span className="row-value">{shipment.recipientCity || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Postal Code</span>
-                <span className="row-value">{shipment.recipientPostalCode || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Country</span>
-                <span className="row-value">{shipment.recipientCountry || 'N/A'}</span>
-              </div>
-              <div className="row">
-                <span className="row-label">Address</span>
-                <span className="row-value">{shipment.recipientAddress || 'N/A'}</span>
-              </div>
-            </div>
-          </div>
 
           {/* Special Flags */}
           {(shipment.isFragile || shipment.isHazardous || shipment.isPerishable || shipment.specialInstructions) && (

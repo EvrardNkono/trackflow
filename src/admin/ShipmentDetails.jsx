@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import useShipments from '../hooks/useShipments'
 import TrackingReceipt from '../components/TrackingReceipt'
+import ShipperInfoCard from '../components/ShipperInfoCard'
 
 const ShipmentDetails = () => {
   const { id } = useParams()
@@ -683,11 +684,14 @@ const ShipmentDetails = () => {
             </div>
           </div>
 
-          {/* Sender Info */}
+          {/* Shipper (personne ou entreprise qui envoie le colis) */}
+          <ShipperInfoCard shipment={shipment} variant="admin" />
+
+          {/* Delivery Company Info */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Building className="w-4 h-4 text-orange-500" />
-              Sender
+              Delivery Company
             </h3>
             
             <div className="space-y-2 text-sm">

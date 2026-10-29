@@ -5,6 +5,8 @@ import { generateSecureTrackingCode } from '../utils/trackingCode'
 import useShipments from '../hooks/useShipments'
 import { Mail, Info, CheckCircle } from 'lucide-react'
 import { DEFAULT_COUNTRY, getCountryOptions } from '../utils/countries'
+import { EMPTY_SHIPPER } from '../utils/shipper'
+import ShipperFields from './ShipperFields'
 
 const CreateShipment = () => {
   const navigate = useNavigate()
@@ -25,7 +27,10 @@ const CreateShipment = () => {
     estimatedDelivery: '',
     departureDateTime: '',
     
-    // 📤 Sender
+    // 🧑‍💼 Shipper (personne ou entreprise qui envoie le colis)
+    ...EMPTY_SHIPPER,
+
+    // 📤 Delivery company (compagnie de livraison)
     senderCompany: 'DHL',
     senderName: 'DHL Express',
     senderEmail: '',
@@ -925,10 +930,13 @@ const CreateShipment = () => {
           </div>
         </div>
 
-        {/* 📤 Sender - Premium Companies */}
+        {/* 🧑‍💼 Shipper - personne physique ou entreprise */}
+        <ShipperFields formData={formData} onChange={handleChange} />
+
+        {/* 📤 Delivery company - Premium Companies */}
         <div className="border-t pt-6">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-orange-500">📤</span> Sender (Premium Logistics Partner)
+            <span className="text-orange-500">📤</span> Delivery Company (Premium Logistics Partner)
           </h3>
           
           <div className="mb-4">

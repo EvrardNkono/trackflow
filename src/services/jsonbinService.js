@@ -82,7 +82,21 @@ export const jsonbinService = {
         estimatedDelivery: shipmentData.estimatedDelivery || null,
         departureDateTime: shipmentData.departureDateTime || '',
         
-        // 📤 Sender
+        // 🧑‍💼 Shipper (personne physique ou entreprise qui envoie le colis)
+        shipperType: shipmentData.shipperType === 'company' ? 'company' : 'individual',
+        shipperFirstName: shipmentData.shipperFirstName || '',
+        shipperLastName: shipmentData.shipperLastName || '',
+        shipperCompanyName: shipmentData.shipperCompanyName || '',
+        shipperContactName: shipmentData.shipperContactName || '',
+        shipperTaxId: shipmentData.shipperTaxId || '',
+        shipperEmail: shipmentData.shipperEmail || '',
+        shipperPhone: shipmentData.shipperPhone || '',
+        shipperAddress: shipmentData.shipperAddress || '',
+        shipperCity: shipmentData.shipperCity || '',
+        shipperPostalCode: shipmentData.shipperPostalCode || '',
+        shipperCountry: shipmentData.shipperCountry || '',
+
+        // 📤 Delivery company (compagnie de livraison)
         senderCompany: shipmentData.senderCompany || '',
         senderName: shipmentData.senderName || '',
         senderEmail: shipmentData.senderEmail || '',
