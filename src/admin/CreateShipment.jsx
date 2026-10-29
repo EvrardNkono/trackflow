@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { generateSecureTrackingCode } from '../utils/trackingCode'
 import useShipments from '../hooks/useShipments'
 import { Mail, Info, CheckCircle } from 'lucide-react'
+import { DEFAULT_COUNTRY, getCountryOptions } from '../utils/countries'
 
 const CreateShipment = () => {
   const navigate = useNavigate()
@@ -26,7 +27,7 @@ const CreateShipment = () => {
     
     // 📤 Sender
     senderCompany: 'DHL',
-    senderName: '',
+    senderName: 'DHL Express',
     senderEmail: '',
     senderPhone: '',
     senderAddress: '',
@@ -39,7 +40,7 @@ const CreateShipment = () => {
     recipientAddress: '',
     recipientCity: '',
     recipientPostalCode: '',
-    recipientCountry: 'United States',
+    recipientCountry: DEFAULT_COUNTRY,
     
     // 📦 Package Details
     weight: '',
@@ -228,96 +229,22 @@ const CreateShipment = () => {
     }))
   }
 
+  // 🏢 Changement de compagnie de livraison.
+  // L'adresse (et le Tax ID) ne sont PLUS remplis automatiquement :
+  // l'administrateur les saisit lui-même. On ne pré-remplit que le nom
+  // de la compagnie, tant que l'admin ne l'a pas personnalisé.
   const handleSenderCompanyChange = (e) => {
     const company = e.target.value
-    setFormData(prev => ({ ...prev, senderCompany: company }))
-    
-    const companyData = {
-      'DHL': { 
-        senderName: 'DHL Express', 
-        senderAddress: '1200 South Pine Island Rd, Plantation, FL 33324',
-        senderTaxId: 'DE-813729405'
-      },
-      'FedEx': { 
-        senderName: 'FedEx International', 
-        senderAddress: '942 South Shady Grove Road, Memphis, TN 38120',
-        senderTaxId: 'US-627184593'
-      },
-      'UPS': { 
-        senderName: 'UPS Worldwide', 
-        senderAddress: '55 Glenlake Parkway NE, Atlanta, GA 30328',
-        senderTaxId: 'US-549237816'
-      },
-      'USPS': { 
-        senderName: 'USPS Priority', 
-        senderAddress: '475 L\'Enfant Plaza SW, Washington, DC 20260',
-        senderTaxId: 'US-384719265'
-      },
-      'Amazon Logistics': { 
-        senderName: 'Amazon Logistics', 
-        senderAddress: '410 Terry Ave N, Seattle, WA 98109',
-        senderTaxId: 'US-927461538'
-      },
-      'TNT': { 
-        senderName: 'TNT Express', 
-        senderAddress: 'TNT Centre, 2132 LR Hoofddorp, Netherlands',
-        senderTaxId: 'NL-836492715'
-      },
-      'DB Schenker': { 
-        senderName: 'DB Schenker Logistics', 
-        senderAddress: 'Kruppstraße 4, 45128 Essen, Germany',
-        senderTaxId: 'DE-728394615'
-      },
-      'Kuehne + Nagel': { 
-        senderName: 'Kuehne + Nagel', 
-        senderAddress: 'Dorfstrasse 50, 8834 Schindellegi, Switzerland',
-        senderTaxId: 'CH-493827156'
-      },
-      'DSV': { 
-        senderName: 'DSV Global Transport', 
-        senderAddress: 'Hovedgaden 630, 2640 Hedehusene, Denmark',
-        senderTaxId: 'DK-572948316'
-      },
-      'XPO Logistics': { 
-        senderName: 'XPO Logistics', 
-        senderAddress: '5 American Lane, Greenwich, CT 06831',
-        senderTaxId: 'US-641738592'
-      },
-      'Yamato Transport': { 
-        senderName: 'Yamato Transport', 
-        senderAddress: '2-1-1 Shinkawa, Chuo-ku, Tokyo 104-0033, Japan',
-        senderTaxId: 'JP-382947156'
-      },
-      'Nippon Express': { 
-        senderName: 'Nippon Express', 
-        senderAddress: '2-3-1 Higashi-Shimbashi, Minato-ku, Tokyo 105-8315, Japan',
-        senderTaxId: 'JP-615847293'
-      },
-      'Toll Group': { 
-        senderName: 'Toll Group', 
-        senderAddress: '380 St Kilda Road, Melbourne, VIC 3004, Australia',
-        senderTaxId: 'AU-748392615'
-      },
-      'Maersk': { 
-        senderName: 'Maersk Logistics', 
-        senderAddress: 'Esplanaden 50, 1263 Copenhagen K, Denmark',
-        senderTaxId: 'DK-637194825'
-      },
-      'Cargo Track Flow': { 
-        senderName: 'Cargo Track Flow Premium', 
-        senderAddress: '123 Logistics Drive, New York, NY 10001',
-        senderTaxId: 'US-736194528'
-      }
-    }
-
-    if (companyData[company]) {
-      setFormData(prev => ({
+    setFormData(prev => {
+      const prevLabel = senderCompanies.find(c => c.value === prev.senderCompany)?.label
+      const newLabel = senderCompanies.find(c => c.value === company)?.label || company
+      const nameIsUntouched = !prev.senderName || prev.senderName === prevLabel
+      return {
         ...prev,
-        senderName: companyData[company].senderName,
-        senderAddress: companyData[company].senderAddress,
-        senderTaxId: companyData[company].senderTaxId,
-      }))
-    }
+        senderCompany: company,
+        senderName: nameIsUntouched ? newLabel : prev.senderName,
+      }
+    })
   }
 
   const handleSubmit = async (e) => {
@@ -1024,7 +951,7 @@ const CreateShipment = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div className="col-span-2">
-              <p className="text-xs text-gray-400 mb-2">📋 Auto-filled from selected partner</p>
+              <p className="text-xs text-gray-500 mb-2">✍️ Enter the delivery company's details manually</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
@@ -1032,29 +959,62 @@ const CreateShipment = () => {
                 type="text"
                 name="senderName"
                 value={formData.senderName}
-                readOnly
-                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700"
+                onChange={handleChange}
+                placeholder="e.g., DHL Express"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tax ID <span className="text-gray-400 text-xs">(Optional)</span>
+              </label>
               <input
                 type="text"
                 name="senderTaxId"
                 value={formData.senderTaxId}
-                readOnly
-                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700"
+                onChange={handleChange}
+                placeholder="e.g., NL-123456789"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email <span className="text-gray-400 text-xs">(Optional)</span>
+              </label>
+              <input
+                type="email"
+                name="senderEmail"
+                value={formData.senderEmail}
+                onChange={handleChange}
+                placeholder="contact@company.com"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone <span className="text-gray-400 text-xs">(Optional)</span>
+              </label>
+              <input
+                type="tel"
+                name="senderPhone"
+                value={formData.senderPhone}
+                onChange={handleChange}
+                placeholder="+31 20 123 4567"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
               <input
                 type="text"
                 name="senderAddress"
                 value={formData.senderAddress}
-                readOnly
-                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700"
+                onChange={handleChange}
+                required
+                placeholder="e.g., Schiphol Boulevard 100, 1118 BG Schiphol, Netherlands"
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none bg-white"
               />
+              <p className="text-xs text-gray-400 mt-1">Address of the delivery company handling the delivery to the customer</p>
             </div>
           </div>
         </div>
@@ -1143,14 +1103,9 @@ const CreateShipment = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               >
-                <option value="United States">United States</option>
-                <option value="Canada">Canada</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="France">France</option>
-                <option value="Germany">Germany</option>
-                <option value="Australia">Australia</option>
-                <option value="Japan">Japan</option>
-                <option value="China">China</option>
+                {getCountryOptions(formData.recipientCountry).map(country => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
               </select>
             </div>
           </div>
